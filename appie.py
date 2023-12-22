@@ -168,6 +168,7 @@ def parse_dir(tree, **params):
         elif v["_type"] == "dir":
             os.makedirs(os.path.join("_site", v["_path"]), exist_ok=True)
             parse_dir(v, **params)  #recurse
+            generate_index(v, **params)
         else:
             parse_path(v, **params)
 
@@ -236,31 +237,16 @@ def parse_path(file, **params):
     elif ext == ".png":
         parse_png(file, outfilepath, **params)
 
-def generate_index(folder, file_items, **params):
-    sitepath = os.path.relpath(folder, "./content")
-    if sitepath != ".": # we don't need to parse the root
-        projects = []
-        for filepath, meta in file_items.items():
-            if folder in os.path.dirname(filepath):
-                projects.append(meta)
-                #print(folder, filepath)
-
-        #print("bla", folder)
-        if projects:
-            sitepath = os.path.relpath(folder, "./content")
-            try:
-                tpl = env.get_template('{}.html'.format(sitepath))
-                print("using the {} template".format(sitepath))
-            except Exception as e:
-                print("using the base template for {}".format(sitepath))
-                tpl = env.get_template('base.html')
-            context = {"subtitle": "blalaal"}
-            context.update({"projects":projects})
-            #import pprint
-            #pprint.pprint(context)
-            sitehtml = tpl.render(**context)
-            print("writing", sitepath, params)
-            fwrite( os.path.join("_site", sitepath, "index.html"), sitehtml)    
+def generate_index(folder, **params):
+    foldername = os.path.dirname(folder["_path"]) or folder["_path"]
+    try:
+        tpl = env.get_template('{}.html'.format(foldername))
+        print("using the {} template".format(foldername))
+    except Exception as e:
+        print("using the base template for {}: error: {}".format(foldername, e))
+        tpl = env.get_template('base.html')
+    sitehtml = tpl.render(file=folder, **params)
+    fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
     
 def make_pages(src, dst, layout, **params):
     """Generate pages from page content."""
