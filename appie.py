@@ -37,6 +37,7 @@ import sys
 import json
 import datetime
 import markdown
+from PIL import Image
 
 # Load jinja templates
 from jinja2 import Environment, FileSystemLoader
@@ -62,22 +63,47 @@ def fwrite(filename, text):
     with open(filename, 'w') as f:
         f.write(text)
 
-def walk_directory(directory):
+def parse_dir(folderpath, files):
+    for k, v in files.items():
+        if v["_type"] == "dir":
+            parse_dir(os.path.join(folderpath, k), v)  #recurse
+        else:
+            parse_path(os.path.join("content", folderpath, k), **params)
+
+def walk_directory(directory, **params):
     """
     Walk through a directory and collect file modification times.
     and an empty dict with folder keys
     """
     file_times = {}
     folders = set()
+    tree = {}
 
     for foldername, subfolders, filenames in os.walk(directory):
         folders.add(foldername)
+        relfolder = os.path.relpath(foldername, directory)
+        d = { "_type": "dir", "_path": relfolder, "_srcpath": foldername }
         for filename in filenames:
-            file_path = os.path.join(foldername, filename)
-            mtime = get_file_mtime(file_path)
-            file_times[file_path] = { "mtime": mtime }
+            filepath = os.path.join(foldername, filename)
+            userfilename, ext = os.path.splitext(filename)
+            relfile = os.path.join(relfolder, filename) # same? os.path.relpath(filepath, directory)
+            mtime = os.path.getmtime(filepath)
+            f = { 
+                "_type": "file", 
+                "_mtime": mtime,
+                "_srcpath": filepath,
+                "_sitedir": relfolder,
+                "_filename": userfilename,
+                "_ext": ext,
+                "_sitepath": relfile
+            }
+            d[filename] = f
+            
+            file_times[filepath] = { "mtime": mtime }
+        tree[relfolder] = d
+        
     
-    return file_times, dict((k,v) for k,v in zip(folders, [None]*len(folders)))
+    return file_times, tree #dict((k,v) for k,v in zip(folders, [None]*len(folders)))
 
 def log(msg, *args):
     """Log message with specified arguments."""
@@ -98,78 +124,86 @@ def read_first_paragraph(html_content):
     else:
         return None
 
-def parse_md(filepath, **params):
-    pass
+def read_first_img(html_content):
+    # Assuming images are done with <img> tag in HTML
+    match = re.search(r'<img[^>]*src=["\'](.*?)["\']', html_content)
 
-def parse_png(filepath, outfilepath, **params):
-    shutil.copy(filepath, outfilepath + ".png")
-    resize_img(filepath, outfilepath, **params)
+    # Return the src attribute if found
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+def parse_png(file, outfilepath, **params):
+    shutil.copy(file["_srcpath"], outfilepath + ".png")
+    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
+    file['mimetype'] = 'image/png'   # https://www.w3.org/Graphics/PNG/
+    file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".png"      
+    resize_img(file, outfilepath, **params)
     
-def parse_jpg(filepath, outfilepath, **params):
-    shutil.copy(filepath, outfilepath + ".jpg")
-    resize_img(filepath, outfilepath, **params)
+def parse_jpg(file, outfilepath, **params):
+    shutil.copy(file["_srcpath"], outfilepath + ".jpg")
+    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
+    file['mimetype'] = 'image/jpg'   # https://www.w3.org/Graphics/PNG/
+    file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".jpg"      
+    resize_img(file, outfilepath, **params)
     
-def resize_img(filepath, outfilepath, **params):
-    #file = os.path.basename(filepath)
-    #filename, ext = os.path.splitext(filepath)
-    #folder = os.path.dirname(filepath)
-    #dirname = os.path.basename(folder)
-    #rootdir, remaining_path = os.path.split(folder)
-    #outfilepath = os.path.join( "_site", "{}.jpg".format(filename) ) 
+def resize_img(file, outfilepath, **params):
     jpg_filename = outfilepath + "_web.jpg"
     thumb_filename = outfilepath + "_thumb.jpg"
 
-    img = Image.open(filepath)
+    img = Image.open(file["_srcpath"])
     size = img.size
     if img.mode in ('RGB', 'RGBA', 'CMYK', 'I'):
-        img.thumbnail(params.get('jpg_size', (1280, 720)), Image.ANTIALIAS)
+        img.thumbnail(params.get('jpg_size', (1280, 720)), Image.LANCZOS)
         img.save(jpg_filename, "JPEG", quality=80, 
                     optimize=True, progressive=True)
-        img.thumbnail(params.get('thumb_size', (384, 216)), Image.ANTIALIAS)
+        img.thumbnail(params.get('thumb_size', (384, 216)), Image.LANCZOS)
         img.save(thumb_filename, "JPEG", quality=80, 
                     optimize=True, progressive=True)
     else:
         log("Image {0} is not a valid color image (mode={1})"
                        .format(filepath, img.mode))
-    shutil.copy(filepath, outfilepath + ".jpg")
 
-    return {
-            'mimetype': 'image/jpg',   # https://www.w3.org/Graphics/PNG/
+    file.update({
             'size': size,              # tuple (width,height)
             'web': jpg_filename,
             'thumb': thumb_filename,
-            'path': dest_path,
             'md5': 'todo'
-            }
+            })
 
-def parse_path(filepath, **params):
+def parse_dir(tree, **params):
+    for k, v in tree.items():
+        # don't parse leaves
+        if type(v) != dict:
+            continue
+        elif v["_type"] == "dir":
+            os.makedirs(os.path.join("_site", v["_path"]), exist_ok=True)
+            parse_dir(v, **params)  #recurse
+        else:
+            parse_path(v, **params)
+
+def parse_path(file, **params):
     """
     Parse the filepath in the folder, we use the folder name to match a jinja
     template
     """
-    sitepath = os.path.relpath(filepath, "./content")
-    sitedir = os.path.dirname(sitepath)
-    file = os.path.basename(filepath)
-    folder = os.path.dirname(filepath)
-    filename, ext = os.path.splitext(file)
+    sitedir = file["_sitedir"]
+    folder = os.path.dirname(file["_sitedir"])
+    filename = file["_filename"]
+    ext = file["_ext"]
     dirname = os.path.basename(folder)
-    outfilepath = os.path.join( "_site", sitedir, filename )
+    outfilepath = os.path.join( "_site", file["_sitedir"], filename )
     
-    #import pdb
-    #pdb.set_trace()
     # try to load a corresponding template
     try:
         template = env.get_template('{}.html'.format(dirname))
     except Exception as e:
         template = env.get_template('base.html')
         
-    # first try to match dirs
-    #if dirname == "img":
-    #    print("parse images")
-        
-    # then file extensions
+    # match file extensions
     if ext == ".md":
-        siteurl = os.path.join( "/", sitedir, filename )+".html"
+        siteurl = os.path.join( file["_sitedir"], filename )+".html"
         md = markdown.Markdown(
                         extensions=[
                             'tables',
@@ -179,31 +213,40 @@ def parse_path(filepath, **params):
                             ]
                         )
         # generate the html from the .md file
-        html = md.convert(fread(filepath))
+        html = md.convert(fread(file["_srcpath"]))
         # TODO: parse tags
+        firstimg = read_first_img(html)
         summary = read_first_paragraph(html)
-        meta = md.Meta #copy?
-        meta.update({"summary": summary})
-        meta.update({"url": siteurl})
-        params.update(md.Meta)
-        params.update({"content": html})
-        sitehtml = template.render(**params)
+        file.update(md.Meta)
+        file.update({
+                    "content": html,
+                    "img": firstimg, 
+                    "summary": summary, 
+                    "url": siteurl
+                    })
+        sitehtml = template.render(file=file, **params)
         fwrite( "{}.html".format(outfilepath), sitehtml)
-        return meta
     elif ext == ".html":
-        siteurl = os.path.join( "/",  sitedir, filename )+".html"
-        html = fread(filepath)
-        params.update({"content": html})
-        sitehtml = template.render(**params)
+        siteurl = os.path.join( "/", filename )+".html"
+        html = fread(file["_srcpath"])
+        firstimg = read_first_img(html)
+        summary = read_first_paragraph(html)
+        file.update({
+            "content": html,
+            "img": firstimg, 
+            "summary": summary, 
+            "url": siteurl
+            })
+        sitehtml = template.render(file=file, **params)
         fwrite( "{}.html".format(outfilepath), sitehtml)
         summary = read_first_paragraph(html)
         if summary:
             return {"summary": summary, "url": siteurl }
         return {"url": siteurl}
     elif ext == ".jpg":
-        return parse_jpg(filepath, outfilepath, **params)
+        parse_jpg(file, outfilepath, **params)
     elif ext == ".png":
-        return parse_png(filepath, outfilepath **params)
+        parse_png(file, outfilepath, **params)
 
 def generate_index(folder, file_items, **params):
     sitepath = os.path.relpath(folder, "./content")
@@ -225,8 +268,8 @@ def generate_index(folder, file_items, **params):
                 tpl = env.get_template('base.html')
             context = {"subtitle": "blalaal"}
             context.update({"projects":projects})
-            import pprint
-            pprint.pprint(context)
+            #import pprint
+            #pprint.pprint(context)
             sitehtml = tpl.render(**context)
             print("writing", sitepath, params)
             fwrite( os.path.join("_site", sitepath, "index.html"), sitehtml)    
@@ -298,8 +341,12 @@ def main():
     template = env.get_template('base.html')
     
     # walk the content dir to a dict and list of folders
-    file_times, folders = walk_directory("./content")
-    
+    file_times, tree = walk_directory("./content")
+                    
+    # process all the dirs files in the tree
+    parse_dir(tree)
+    sys.exit(0)
+
     # process all the files
     for filepath, meta in file_times.items():
         #print(filepath, meta)
