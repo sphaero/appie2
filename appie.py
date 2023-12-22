@@ -299,7 +299,7 @@ def main():
 
     # Default parameters.
     params = {
-        'base_path': '',
+        'base_path': '/',
         'subtitle': 'Lorem Ipsum',
         'author': 'Admin',
         'site_url': 'http://localhost:8000',
@@ -318,7 +318,7 @@ def main():
     file_times, tree = walk_directory("./content")
                     
     # process all the dirs files in the tree
-    parse_dir(tree)
+    parse_dir(tree, **params)
     sys.exit(0)
 
     page_layout = fread('layout/page.html')
