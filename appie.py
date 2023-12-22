@@ -321,25 +321,6 @@ def main():
     parse_dir(tree)
     sys.exit(0)
 
-    # process all the files
-    for filepath, meta in file_times.items():
-        #print(filepath, meta)
-        newmeta = parse_path(filepath, **params)
-        if newmeta:
-            meta.update(newmeta)
-        folders[filepath] = newmeta
-        
-    # generate an index for every folder
-    #import pprint
-    #pprint.pprint(folders)
-    for path in folders:
-        generate_index(path, file_times, **params)
-        
-    #for foldername, subfolders, filenames in os.walk("content"):
-    #    for filename in filenames:
-    #        make_page(foldername, filename, **params)
-    sys.exit(0)
-
     page_layout = fread('layout/page.html')
     post_layout = fread('layout/post.html')
     list_layout = fread('layout/list.html')
