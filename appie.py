@@ -44,10 +44,9 @@ from jinja2 import Environment, FileSystemLoader
 # Create a Jinja2 environment and specify the template directory
 env = Environment(loader=FileSystemLoader('./templates'))
 
-
-def get_file_mtime(file_path):
-    """Get the modification time of a file."""
-    return os.path.getmtime(file_path)
+def log(msg, *args):
+    """Log message with specified arguments."""
+    sys.stderr.write(msg.format(*args) + '\n')
 
 def fread(filename):
     """Read file and close the file."""
@@ -62,13 +61,6 @@ def fwrite(filename, text):
 
     with open(filename, 'w') as f:
         f.write(text)
-
-def parse_dir(folderpath, files):
-    for k, v in files.items():
-        if v["_type"] == "dir":
-            parse_dir(os.path.join(folderpath, k), v)  #recurse
-        else:
-            parse_path(os.path.join("content", folderpath, k), **params)
 
 def walk_directory(directory, **params):
     """
@@ -101,23 +93,20 @@ def walk_directory(directory, **params):
             
             file_times[filepath] = { "mtime": mtime }
         tree[relfolder] = d
-        
-    
+            
     return file_times, tree #dict((k,v) for k,v in zip(folders, [None]*len(folders)))
 
-def log(msg, *args):
-    """Log message with specified arguments."""
-    sys.stderr.write(msg.format(*args) + '\n')
-
-def rfc_2822_format(date_str):
-    """Convert yyyy-mm-dd date string to RFC 2822 format date string."""
-    d = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-    return d.strftime('%a, %d %b %Y %H:%M:%S +0000')
+def parse_dir(folderpath, files):
+    for k, v in files.items():
+        if v["_type"] == "dir":
+            parse_dir(os.path.join(folderpath, k), v)  #recurse
+        else:
+            parse_path(os.path.join("content", folderpath, k), **params)
 
 def read_first_paragraph(html_content):
+    """return the first paragraph found in the html content"""
     # Assuming paragraphs are separated by double line breaks in HTML
     paragraphs = html_content.split('<p>')
-        
     if len(paragraphs) > 1:
         first_paragraph = paragraphs[1].split('</p>')[0]
         return first_paragraph
@@ -127,7 +116,6 @@ def read_first_paragraph(html_content):
 def read_first_img(html_content):
     # Assuming images are done with <img> tag in HTML
     match = re.search(r'<img[^>]*src=["\'](.*?)["\']', html_content)
-
     # Return the src attribute if found
     if match:
         return match.group(1)
@@ -144,7 +132,7 @@ def parse_png(file, outfilepath, **params):
 def parse_jpg(file, outfilepath, **params):
     shutil.copy(file["_srcpath"], outfilepath + ".jpg")
     outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
-    file['mimetype'] = 'image/jpg'   # https://www.w3.org/Graphics/PNG/
+    file['mimetype'] = 'image/jpg'
     file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".jpg"      
     resize_img(file, outfilepath, **params)
     
