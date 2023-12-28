@@ -44,10 +44,6 @@ from jinja2 import Environment, FileSystemLoader
 # Create a Jinja2 environment and specify the template directory
 env = Environment(loader=FileSystemLoader('./templates'))
 
-def log(msg, *args):
-    """Log message with specified arguments."""
-    sys.stderr.write(msg.format(*args) + '\n')
-
 def fread(filename):
     """Read file and close the file."""
     with open(filename, 'r') as f:
@@ -64,8 +60,8 @@ def fwrite(filename, text):
 
 def walk_directory(directory, **params):
     """
-    Walk through a directory and collect file modification times.
-    and an empty dict with folder keys
+    Walk through a directory and collect file meta data.
+    Return a dict containing all entries
     """
     file_times = {}
     folders = set()
@@ -96,13 +92,6 @@ def walk_directory(directory, **params):
             
     return file_times, tree #dict((k,v) for k,v in zip(folders, [None]*len(folders)))
 
-def parse_dir(folderpath, files):
-    for k, v in files.items():
-        if v["_type"] == "dir":
-            parse_dir(os.path.join(folderpath, k), v)  #recurse
-        else:
-            parse_path(os.path.join("content", folderpath, k), **params)
-
 def read_first_paragraph(html_content):
     """return the first paragraph found in the html content"""
     # Assuming paragraphs are separated by double line breaks in HTML
@@ -121,44 +110,6 @@ def read_first_img(html_content):
         return match.group(1)
     else:
         return None
-
-def parse_png(file, outfilepath, **params):
-    shutil.copy(file["_srcpath"], outfilepath + ".png")
-    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
-    file['mimetype'] = 'image/png'   # https://www.w3.org/Graphics/PNG/
-    file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".png"      
-    resize_img(file, outfilepath, **params)
-    
-def parse_jpg(file, outfilepath, **params):
-    shutil.copy(file["_srcpath"], outfilepath + ".jpg")
-    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
-    file['mimetype'] = 'image/jpg'
-    file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".jpg"      
-    resize_img(file, outfilepath, **params)
-    
-def resize_img(file, outfilepath, **params):
-    jpg_filename = outfilepath + "_web.jpg"
-    thumb_filename = outfilepath + "_thumb.jpg"
-
-    img = Image.open(file["_srcpath"])
-    size = img.size
-    if img.mode in ('RGB', 'RGBA', 'CMYK', 'I'):
-        img.thumbnail(params.get('jpg_size', (1280, 720)), Image.LANCZOS)
-        img.save(jpg_filename, "JPEG", quality=80, 
-                    optimize=True, progressive=True)
-        img.thumbnail(params.get('thumb_size', (384, 216)), Image.LANCZOS)
-        img.save(thumb_filename, "JPEG", quality=80, 
-                    optimize=True, progressive=True)
-    else:
-        log("Image {0} is not a valid color image (mode={1})"
-                       .format(filepath, img.mode))
-
-    file.update({
-            'size': size,              # tuple (width,height)
-            'web': jpg_filename,
-            'thumb': thumb_filename,
-            'md5': 'todo'
-            })
 
 def parse_dir(tree, **params):
     for k, v in tree.items():
@@ -237,59 +188,54 @@ def parse_path(file, **params):
     elif ext == ".png":
         parse_png(file, outfilepath, **params)
 
+def parse_png(file, outfilepath, **params):
+    shutil.copy(file["_srcpath"], outfilepath + ".png")
+    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
+    file['mimetype'] = 'image/png'   # https://www.w3.org/Graphics/PNG/
+    file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".png"
+    resize_img(file, outfilepath, **params)
+
+def parse_jpg(file, outfilepath, **params):
+    shutil.copy(file["_srcpath"], outfilepath + ".jpg")
+    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
+    file['mimetype'] = 'image/jpg'
+    file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".jpg"
+    resize_img(file, outfilepath, **params)
+
+def resize_img(file, outfilepath, **params):
+    jpg_filename = outfilepath + "_web.jpg"
+    thumb_filename = outfilepath + "_thumb.jpg"
+
+    img = Image.open(file["_srcpath"])
+    size = img.size
+    if img.mode in ('RGB', 'RGBA', 'CMYK', 'I'):
+        img.thumbnail(params.get('jpg_size', (1280, 720)), Image.LANCZOS)
+        img.save(jpg_filename, "JPEG", quality=80,
+                    optimize=True, progressive=True)
+        img.thumbnail(params.get('thumb_size', (384, 216)), Image.LANCZOS)
+        img.save(thumb_filename, "JPEG", quality=80,
+                    optimize=True, progressive=True)
+    else:
+        log("Image {0} is not a valid color image (mode={1})"
+                       .format(filepath, img.mode))
+
+    file.update({
+            'size': size,              # tuple (width,height)
+            'web': jpg_filename,
+            'thumb': thumb_filename,
+            'md5': 'todo'
+            })
+
 def generate_index(folder, **params):
     foldername = os.path.dirname(folder["_path"]) or folder["_path"]
     try:
         tpl = env.get_template('{}.html'.format(foldername))
         print("using the {} template".format(foldername))
     except Exception as e:
-        print("using the base template for {}: error: {}".format(foldername, e))
+        print("using the base template for {}: (error: {})".format(foldername, e))
         tpl = env.get_template('base.html')
     sitehtml = tpl.render(file=folder, **params)
     fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
-    
-def make_pages(src, dst, layout, **params):
-    """Generate pages from page content."""
-    items = []
-
-    for src_path in glob.glob(src):
-        content = read_content(src_path)
-
-        page_params = dict(params, **content)
-
-        # Populate placeholders in content if content-rendering is enabled.
-        if page_params.get('render') == 'yes':
-            rendered_content = render(page_params['content'], **page_params)
-            page_params['content'] = rendered_content
-            content['content'] = rendered_content
-
-        items.append(content)
-
-        dst_path = render(dst, **page_params)
-        output = render(layout, **page_params)
-
-        log('Rendering {} => {} ...', src_path, dst_path)
-        fwrite(dst_path, output)
-
-    return sorted(items, key=lambda x: x['date'], reverse=True)
-
-
-def make_list(posts, dst, list_layout, item_layout, **params):
-    """Generate list page for a blog."""
-    items = []
-    for post in posts:
-        item_params = dict(params, **post)
-        item_params['summary'] = truncate(post['content'])
-        item = render(item_layout, **item_params)
-        items.append(item)
-
-    params['content'] = ''.join(items)
-    dst_path = render(dst, **params)
-    output = render(list_layout, **params)
-
-    log('Rendering list => {} ...', dst_path)
-    fwrite(dst_path, output)
-
 
 def main():
     # Create a new _site directory from scratch.
@@ -310,10 +256,6 @@ def main():
     if os.path.isfile('params.json'):
         params.update(json.loads(fread('params.json')))
 
-
-    # Load the template by name
-    template = env.get_template('base.html')
-    
     # walk the content dir to a dict and list of folders
     file_times, tree = walk_directory("./content")
                     
