@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ title }} - {{ subtitle }}</title>
+    <title>{{ title|join(' ') }} - {{ subtitle|join(' ') }}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" type="text/css" href="{{ base_path }}/style.css">
+    <link rel="stylesheet" type="text/css" href="{{ base_path }}style.css">
 </head>
 
 <body id="{{ slug }}">
@@ -15,17 +15,23 @@
         <a href="{{ base_path }}/">Home</a>
     </span>
     <span class="links">
-        <a href="{{ base_path }}/blog/">Blog</a>
+        <a href="{{ base_path }}blog/">Blog</a>
         <a href="{{ base_path }}/news/">News</a>
         <a href="{{ base_path }}/contact/">Contact</a>
         <a href="{{ base_path }}/about/">About</a>
     </span>
 </section>
 </nav>
-
+<tags>
+    <ul> 
+    {% for tag in tags %}
+    <li>{{ tag }}</li>
+    {% endfor %}
+    </ul>
+</tags>
+<date>{{ date|join(' ') }}</date>
 <main>
 {{ content }}
-<div>hmmm</div>
 </main>
 
 <footer>

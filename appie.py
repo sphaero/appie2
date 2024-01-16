@@ -164,7 +164,7 @@ def parse_path(file, **params):
                     "summary": summary, 
                     "url": siteurl
                     })
-        sitehtml = template.render(file=file, **params)
+        sitehtml = template.render(**file, **params)
         fwrite( "{}.html".format(outfilepath), sitehtml)
     elif ext == ".html":
         siteurl = os.path.join( "/", filename )+".html"
@@ -177,7 +177,7 @@ def parse_path(file, **params):
             "summary": summary, 
             "url": siteurl
             })
-        sitehtml = template.render(file=file, **params)
+        sitehtml = template.render(**file, **params)
         fwrite( "{}.html".format(outfilepath), sitehtml)
         summary = read_first_paragraph(html)
         if summary:
