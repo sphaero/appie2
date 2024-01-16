@@ -112,6 +112,17 @@ def read_first_img(html_content):
         return None
 
 def parse_dir(tree, **params):
+    # get rootdirs for the index/nav:
+    rootdirs = []
+    for k,v in tree.items():
+        if type(v) != dict:
+            continue
+        if v.get("_type") == "dir":
+            rootdirs.append(k)
+    print(params)
+    params["rootdirs"] = rootdirs
+
+    # now parse the tree recursively
     for k, v in tree.items():
         # don't parse leaves
         if type(v) != dict:
@@ -227,9 +238,10 @@ def resize_img(file, outfilepath, **params):
             })
 
 def generate_index(folder, **params):
+    print(folder, params)
     foldername = os.path.dirname(folder["_path"]) or folder["_path"]
     try:
-        tpl = env.get_template('{}.html'.format(foldername))
+        tpl = env.get_template('{}_index.html'.format(foldername))
         print("using the {} template".format(foldername))
     except Exception as e:
         print("using the base template for {}: (error: {})".format(foldername, e))

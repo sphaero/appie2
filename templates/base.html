@@ -15,10 +15,9 @@
         <a href="{{ base_path }}/">Home</a>
     </span>
     <span class="links">
-        <a href="{{ base_path }}blog/">Blog</a>
-        <a href="{{ base_path }}/news/">News</a>
-        <a href="{{ base_path }}/contact/">Contact</a>
-        <a href="{{ base_path }}/about/">About</a>
+        {% for dir in rootdirs %}
+        <a href="{{ base_path }}{{dir}}/">{{dir}}</a>
+        {% endfor %}
     </span>
 </section>
 </nav>
