@@ -107,6 +107,14 @@ def read_first_paragraph(html_content):
     else:
         return None
 
+def read_headers(html_content):
+    """Parse headers in text and yield (key, value, end-index) tuples."""
+    for match in re.finditer(r'\s*<!--\s*(.+?)\s*:\s*(.+?)\s*-->\s*|.+', html_content):
+        if not match.group(1):
+            break
+        yield match.group(1), match.group(2), match.end()
+
+
 def read_first_img(html_content):
     # Assuming images are done with <img> tag in HTML
     match = re.search(r'<img[^>]*src=["\'](.*?)["\']', html_content)
@@ -177,7 +185,9 @@ def parse_path(file, **params):
     elif ext == ".html":
         siteurl = os.path.join( "/", filename )+".html"
         html = fread(file["_srcpath"])
-        # todo: try meta extraction
+        # try to find meta data (<!--) in html
+        for key, val, end in read_headers(html):
+            file[key] = val
         firstimg = read_first_img(html)
         summary = read_first_paragraph(html)
         file.update({
@@ -276,9 +286,6 @@ def main():
                 continue
             if v.get("_type") == "dir":
                 nav.append(k)
-            # there could also just a html file the navigation
-            if v.get("_ext") == '.html':
-                nav.append(k)                
 
         params["nav"] = nav
 
