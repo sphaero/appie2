@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - {{ subtitle }} {% endblock %}
+{% block content %}
+<tags>
+    <ul> 
+    {% for tag in tags %}
+    <li>{{ tag }}</li>
+    {% endfor %}
+    </ul>
+</tags>
+<date>{{ date }}</date>
+<main>
+{{ content }}
+<index>
+    {% for entry in entries %}
+    <div>
+        <h1><a href="{{ base_path }}{{entry.url}}"></h1>
+            {{ entry.title }}
+            {% if 'img' in entry and entry['img'] %}
+                <img clas="indeximg" src={{entry.img}}/>
+            {% endif %}
+            
+        </a>
+        <p>{{entry.summary}}</p>
+    </div>
+    {% endfor %}
+    </ul>
+{{ content }}
+</index>
+</main>
+{% endblock %}
