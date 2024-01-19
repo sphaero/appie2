@@ -144,6 +144,7 @@ def parse_path(file, **params):
     # try to load a corresponding template
     try:
         template = env.get_template('{}.html'.format(dirname))
+        print("using the {} template for {}".format(dirname, file["_srcpath"]))
     except Exception as e:
         template = env.get_template('default.html')
         
@@ -176,6 +177,7 @@ def parse_path(file, **params):
     elif ext == ".html":
         siteurl = os.path.join( "/", filename )+".html"
         html = fread(file["_srcpath"])
+        # todo: try meta extraction
         firstimg = read_first_img(html)
         summary = read_first_paragraph(html)
         file.update({
@@ -237,9 +239,8 @@ def generate_index(folder, **params):
     foldername = os.path.dirname(folder["_path"]) or folder["_path"]
     try:
         tpl = env.get_template('{}_index.html'.format(foldername))
-        print("using the {} template".format(foldername))
+        print("using the {} template for {}".format(foldername, folder["_srcpath"]))
     except Exception as e:
-        print("using the base template for {}: (error: {})".format(foldername, e))
         tpl = env.get_template('index.html')
     entries = tuple(v for k, v in folder.items() if type(v) == dict)
     sitehtml = tpl.render(entries=entries, **folder, **params)
@@ -267,15 +268,19 @@ def main():
     # walk the content dir to a dict and list of folders
     file_times, tree = walk_directory("./content")
                     
-    # get rootdirs for the index/nav:
-    if not params.get("rootdirs"):
-        rootdirs = []
+    # get nav entries from the root dir:
+    if not params.get("nav"):
+        nav = []
         for k,v in tree.items():
             if type(v) != dict:
                 continue
             if v.get("_type") == "dir":
-                rootdirs.append(k)
-        params["rootdirs"] = rootdirs
+                nav.append(k)
+            # there could also just a html file the navigation
+            if v.get("_ext") == '.html':
+                nav.append(k)                
+
+        params["nav"] = nav
 
     # process all the dirs files in the tree
     parse_dir(tree, **params)

@@ -6,18 +6,16 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-
     <nav>
-        <ul>
-            {% for dir in rootdirs %}
-            <li><a href="{{ base_path }}{{dir}}/">{{dir}}</a></li>
-            {% endfor %}
-        </ul>
+        <img src="/logo.png" alt="logo" />
+        {% for entry in nav %}
+        <a href="{{ base_path }}{{entry}}/">{{entry}}</a>
+        {% endfor %}
     </nav>
 
-    <div>
+    <main>
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     <footer>
         <p>&copy; {{ current_year }} Lorem Ipsum</p>
