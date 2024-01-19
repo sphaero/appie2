@@ -1,35 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{% block title %}{% endblock %} - My Webpage</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" type="text/css" href="{{ base_path }}style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
 </head>
-
 <body>
-<nav>
-<section>
-    <span class="links">
-        {% for dir in rootdirs %}
-        <a href="{{ base_path }}{{dir}}/">{{dir}}</a>
-        {% endfor %}
-    </span>
-</section>
-</nav>
 
-{% block content %}{% endblock %}
+    <nav>
+        <ul>
+            {% for dir in rootdirs %}
+            <li><a href="{{ base_path }}{{dir}}/">{{dir}}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
 
-<footer>
-<section>
-<p>&copy; {{ current_year }} Lorem Ipsum</p>
-<p>
-    <a href="https://twitter.com/sunainapai">Twitter</a>
-    <a href="https://github.com/sunainapai">GitHub</a>
-    <a href="https://www.example.com/">Example</a>
-</p>
-</section>
-</footer>
+    <div>
+        {% block content %}{% endblock %}
+    </div>
 
+    <footer>
+        <p>&copy; {{ current_year }} Lorem Ipsum</p>
+        <ul>
+            <li><a href="https://socialshit.com/masterme">SocialShit</a></li>
+            <li><a href="https://github.com/sphaero">GitHub</a></li>
+            <li><a href="https://www.example.com/">Example</a></li>
+        </ul>
+    </footer>
 </body>
 </html>
