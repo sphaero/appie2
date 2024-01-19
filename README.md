@@ -18,11 +18,7 @@ Contents
 
 * [Introduction](#introduction)
 * [Usage](#usage)
-* [Get Started](#get-started)
 * [The Code](#the-code)
-* [Layout](#layout)
-* [Content](#content)
-* [FAQ](#faq)
 * [Credits](#credits)
 * [License](#license)
 * [Support](#support)
@@ -153,14 +149,14 @@ all meta data of the content directory. For example the dictionary looks like th
 We then extract the root directories of the content dir which we 
 will use to generate the nav entries for the navigation menu.
 
-Finally we recursively run the `parse_dir` method on the tree
-dictionary. So `parse_dir` is called for every directory entry
+Finally we recursively run the `parse_dir()` method on the tree
+dictionary. So `parse_dir()` is called for every directory entry
 in the tree. If an entry is not a directory but a file then
-`parse_path` is called on the entry. Finally we for every dir 
-we call `generate_index` which will generate an index.html page 
+`parse_path()` is called on the entry. Finally for every dir 
+we call `generate_index()` which will generate an index.html page 
 for the directory.
 
-'parse_path` parses markdown, plain html, and images. It will
+`parse_path()` parses markdown, plain html, and images. It will
 parse them through jinja2 and finally copies to the '_site' dir.
 All meta data and params are passed to jinja2. If it can't match 
 a file to parse it will just copy it to the '_site' dir.
