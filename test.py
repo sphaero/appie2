@@ -4,27 +4,39 @@ from appie import walk_directory, parse_path, parse_dir
 
 from pprint import pprint
 
-rettgt = {'.': {'_path': '.',
-       '_srcpath': './test',
-       '_type': 'dir',
-       'bla.md': {'_ext': '.md',
-                  '_filename': 'bla',
-                  '_mtime': 1703251224.8210585,
-                  '_sitedir': '.',
-                  '_sitepath': './bla.md',
-                  '_srcpath': './test/bla.md',
-                  '_type': 'file'},
-       'test.png': {'_ext': '.png',
+rettgt = {
+            '.': 
+            {
+                '_path': '.',
+                '_srcpath': './test',
+                '_type': 'dir',
+                'bla.md': 
+                {
+                      '_ext': '.md',
+                      '_filename': 'bla',
+                      '_mtime': 1703251224.8210585,
+                      '_sitedir': '.',
+                      '_sitepath': './bla.md',
+                      '_srcpath': './test/bla.md',
+                      '_type': 'file'
+                },
+                'test.png': 
+                {
+                    '_ext': '.png',
                     '_filename': 'test',
                     '_mtime': 1703254450.232499,
                     '_sitedir': '.',
                     '_sitepath': './test.png',
                     '_srcpath': './test/test.png',
-                    '_type': 'file'}},
- 'testdir': {'_path': 'testdir',
-             '_srcpath': './test/testdir',
-             '_type': 'dir',
-             'test.jpg': {'_ext': '.jpg',
+                    '_type': 'file'
+                }
+            },
+            'testdir': 
+            {
+                '_path': 'testdir',
+                '_srcpath': './test/testdir',
+                '_type': 'dir',
+                'test.jpg': {'_ext': '.jpg',
                           '_filename': 'test',
                           '_mtime': 1703254472.9648764,
                           '_sitedir': 'testdir',

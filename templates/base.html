@@ -4,8 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
+    <style>
+        body {
+            max-width: 800px; /* Set your desired maximum width for desktop */
+            margin: 20px auto;
+            padding: 20px;
+        }
+        @media (max-width: 767px) {
+            body {
+                max-width: none; /* Reset max-width for mobile devices */
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
-<body>
+<body >
     <nav>
         <img src="/logo.png" alt="logo" />
         {% for entry in nav %}
