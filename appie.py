@@ -183,7 +183,7 @@ def parse_path(file, **params):
         sitehtml = template.render(**file, **params)
         fwrite( "{}.html".format(outfilepath), sitehtml)
     elif ext == ".html":
-        siteurl = os.path.join( "/", filename )+".html"
+        siteurl = os.path.join( file["_sitedir"], filename )+".html"
         html = fread(file["_srcpath"])
         # try to find meta data (<!--) in html
         for key, val, end in read_headers(html):

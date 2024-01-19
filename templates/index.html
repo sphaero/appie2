@@ -19,9 +19,11 @@
             {% if 'img' in entry and entry['img'] %}
                 <img clas="indeximg" src={{entry.img}}/>
             {% endif %}
-            
         </a>
-        <p>{{entry.summary}}</p>
+        <p>
+            {{entry.summary}}
+            <a href="{{ base_path }}{{entry.url}}"> (read more)</a>
+        </p>
     </div>
     {% endfor %}
     </ul>
