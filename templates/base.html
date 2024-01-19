@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ title|join(' ') }} - {{ subtitle|join(' ') }}</title>
+    <title>{% block title %}{% endblock %} - My Webpage</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" type="text/css" href="{{ base_path }}style.css">
 </head>
 
-<body id="{{ slug }}">
-
+<body>
 <nav>
 <section>
-    <span class="home">
-        <a href="{{ base_path }}/">Home</a>
-    </span>
     <span class="links">
         {% for dir in rootdirs %}
         <a href="{{ base_path }}{{dir}}/">{{dir}}</a>
@@ -21,17 +17,8 @@
     </span>
 </section>
 </nav>
-<tags>
-    <ul> 
-    {% for tag in tags %}
-    <li>{{ tag }}</li>
-    {% endfor %}
-    </ul>
-</tags>
-<date>{{ date|join(' ') }}</date>
-<main>
-{{ content }}
-</main>
+
+{% block content %}{% endblock %}
 
 <footer>
 <section>

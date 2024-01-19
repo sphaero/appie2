@@ -58,6 +58,11 @@ def fwrite(filename, text):
     with open(filename, 'w') as f:
         f.write(text)
 
+def fix_meta(meta):
+    for k,v in meta.items():
+        if len(v) == 1:
+            meta[k] = v[0]
+    
 def walk_directory(directory, **params):
     """
     Walk through a directory and collect file meta data.
@@ -112,17 +117,7 @@ def read_first_img(html_content):
         return None
 
 def parse_dir(tree, **params):
-    # get rootdirs for the index/nav:
-    rootdirs = []
-    for k,v in tree.items():
-        if type(v) != dict:
-            continue
-        if v.get("_type") == "dir":
-            rootdirs.append(k)
-    print(params)
-    params["rootdirs"] = rootdirs
-
-    # now parse the tree recursively
+    # parse the tree recursively
     for k, v in tree.items():
         # don't parse leaves
         if type(v) != dict:
@@ -150,7 +145,7 @@ def parse_path(file, **params):
     try:
         template = env.get_template('{}.html'.format(dirname))
     except Exception as e:
-        template = env.get_template('base.html')
+        template = env.get_template('default.html')
         
     # match file extensions
     if ext == ".md":
@@ -165,14 +160,15 @@ def parse_path(file, **params):
                         )
         # generate the html from the .md file
         html = md.convert(fread(file["_srcpath"]))
+        fix_meta(md.Meta)
         # TODO: parse tags
-        firstimg = read_first_img(html)
-        summary = read_first_paragraph(html)
+        if not md.Meta.get('img'):
+            md.Meta['img'] = read_first_img(html)
+        if not md.Meta.get('summary'):
+            md.Meta['summary'] = read_first_paragraph(html)
         file.update(md.Meta)
         file.update({
                     "content": html,
-                    "img": firstimg, 
-                    "summary": summary, 
                     "url": siteurl
                     })
         sitehtml = template.render(**file, **params)
@@ -238,15 +234,15 @@ def resize_img(file, outfilepath, **params):
             })
 
 def generate_index(folder, **params):
-    print(folder, params)
     foldername = os.path.dirname(folder["_path"]) or folder["_path"]
     try:
         tpl = env.get_template('{}_index.html'.format(foldername))
         print("using the {} template".format(foldername))
     except Exception as e:
         print("using the base template for {}: (error: {})".format(foldername, e))
-        tpl = env.get_template('base.html')
-    sitehtml = tpl.render(file=folder, **params)
+        tpl = env.get_template('index.html')
+    entries = tuple(v for k, v in folder.items() if type(v) == dict)
+    sitehtml = tpl.render(entries=entries, **folder, **params)
     fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
 
 def main():
@@ -271,6 +267,16 @@ def main():
     # walk the content dir to a dict and list of folders
     file_times, tree = walk_directory("./content")
                     
+    # get rootdirs for the index/nav:
+    if not params.get("rootdirs"):
+        rootdirs = []
+        for k,v in tree.items():
+            if type(v) != dict:
+                continue
+            if v.get("_type") == "dir":
+                rootdirs.append(k)
+        params["rootdirs"] = rootdirs
+
     # process all the dirs files in the tree
     parse_dir(tree, **params)
     sys.exit(0)
