@@ -12,7 +12,7 @@ TL;DR
 * Run python3 appie.py, the site is generated in the _site dir
 * Upload to some webhosting platform
 
-
+See the example [here](http://pong.hku.nl/~arnaud.loonstra/appie2/)
 Contents
 --------
 
