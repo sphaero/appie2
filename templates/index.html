@@ -4,7 +4,7 @@
 <tags>
     <ul> 
     {% for tag in tags %}
-    <li>{{ tag }}</li>
+    <li><a href="{{ base_path }}/tags/{{ tag }}.html">{{ tags }}</a></li>
     {% endfor %}
     </ul>
 </tags>
@@ -20,8 +20,10 @@
             {% endif %}
         </a>
         <p>
-            {{entry.summary}}
-            <a href="{{ base_path }}{{entry.url}}"> (read more)</a>
+            {% if entry.summary %}
+                {{entry.summary}}
+                <a href="{{ base_path }}{{entry.url}}"> (read more)</a>
+            {% endif %}
         </p>
     </section>
     {% endfor %}

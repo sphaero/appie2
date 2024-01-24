@@ -136,6 +136,8 @@ def parse_dir(tree, **params):
             generate_index(v, **params)
         else:
             parse_path(v, **params)
+    generate_tags(params["_tags"], **params)
+
 
 def parse_path(file, **params):
     """
@@ -206,6 +208,14 @@ def parse_path(file, **params):
         parse_jpg(file, outfilepath, **params)
     elif ext == ".png":
         parse_png(file, outfilepath, **params)
+    else:
+        # just copy
+        shutil.copy(file["_srcpath"], outfilepath + ext)
+    # save any tags we found to params
+    for t in file.get("tags", []):
+        if not params.get("_tags").get(t): params["_tags"][t] = []
+        taglist = params["_tags"].get(t)
+        taglist.append(file)
 
 def parse_png(file, outfilepath, **params):
     shutil.copy(file["_srcpath"], outfilepath + ".png")
@@ -256,6 +266,26 @@ def generate_index(folder, **params):
     sitehtml = tpl.render(entries=entries, **folder, **params)
     fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
 
+def generate_tags(taglist, **params):
+    try:
+        tpl = env.get_template('tags_index.html')
+        print("using the tags_index template")
+    except Exception as e:
+        tpl = env.get_template('index.html')
+
+    alltags = []
+    # write a html doc for every tag
+    for tag, entries in taglist.items():
+        alltags.append({ "title": tag, "url": "tags/"+tag})
+        foldername = os.path.join("tags", tag)
+        sitehtml = tpl.render(title=tag, content="<h1>tagged with "+tag+"</h1>",
+                                entries=entries, **params)
+        fwrite( os.path.join("_site", "tags", tag + ".html"), sitehtml
+    # finally write the tag index
+    sitehtml = tpl.render(title="tags", content="<h1>All tags</h1>",
+                                entries=alltags, **params)
+    fwrite( os.path.join("_site", "tags", "index.html"), sitehtml)
+
 def main():
     # Create a new _site directory from scratch.
     if os.path.isdir('_site'):
@@ -268,7 +298,8 @@ def main():
         'subtitle': 'Lorem Ipsum',
         'author': 'Admin',
         'site_url': 'http://localhost:8000',
-        'current_year': datetime.datetime.now().year
+        'current_year': datetime.datetime.now().year,
+        '_tags': {},
     }
 
     # If params.json exists, load it.

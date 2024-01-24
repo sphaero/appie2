@@ -4,7 +4,7 @@
 <tags>
     <ul> 
     {% for tag in tags %}
-    <li>{{ tag }}</li>
+    <li><a href="{{ base_path }}tags/{{ tag }}.html">{{ tag }}</a></li>
     {% endfor %}
     </ul>
 </tags>
