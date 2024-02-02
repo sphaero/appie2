@@ -172,7 +172,6 @@ def parse_path(file, **params):
         # generate the html from the .md file
         html = md.convert(fread(file["_srcpath"]))
         fix_meta(md.Meta)
-        # TODO: parse tags
         if not md.Meta.get('img'):
             md.Meta['img'] = read_first_img(html)
         if not md.Meta.get('summary'):
@@ -280,7 +279,7 @@ def generate_tags(taglist, **params):
         foldername = os.path.join("tags", tag)
         sitehtml = tpl.render(title=tag, content="<h1>tagged with "+tag+"</h1>",
                                 entries=entries, **params)
-        fwrite( os.path.join("_site", "tags", tag + ".html"), sitehtml
+        fwrite( os.path.join("_site", "tags", tag + ".html"), sitehtml)
     # finally write the tag index
     sitehtml = tpl.render(title="tags", content="<h1>All tags</h1>",
                                 entries=alltags, **params)
