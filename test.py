@@ -14,7 +14,6 @@ rettgt = {
                 {
                       '_ext': '.md',
                       '_filename': 'bla',
-                      '_mtime': 1703251224.8210585,
                       '_sitedir': '.',
                       '_sitepath': './bla.md',
                       '_srcpath': './test/bla.md',
@@ -24,7 +23,6 @@ rettgt = {
                 {
                     '_ext': '.png',
                     '_filename': 'test',
-                    '_mtime': 1703254450.232499,
                     '_sitedir': '.',
                     '_sitepath': './test.png',
                     '_srcpath': './test/test.png',
@@ -38,14 +36,12 @@ rettgt = {
                 '_type': 'dir',
                 'test.jpg': {'_ext': '.jpg',
                           '_filename': 'test',
-                          '_mtime': 1703254472.9648764,
                           '_sitedir': 'testdir',
                           '_sitepath': 'testdir/test.jpg',
                           '_srcpath': './test/testdir/test.jpg',
                           '_type': 'file'},
              'test.md': {'_ext': '.md',
                          '_filename': 'test',
-                         '_mtime': 1703251351.642544,
                          '_sitedir': 'testdir',
                          '_sitepath': 'testdir/test.md',
                          '_srcpath': './test/testdir/test.md',
@@ -58,14 +54,12 @@ rettgt2 = {'.': {'_path': '.',
        '_type': 'dir',
        'bla.md': {'_ext': '.md',
                   '_filename': 'bla',
-                  '_mtime': 1703251224.8210585,
                   '_sitedir': '.',
                   '_sitepath': './bla.md',
                   '_srcpath': './test/bla.md',
                   '_type': 'file'},
        'test.png': {'_ext': '.png',
                     '_filename': 'test',
-                    '_mtime': 1703254450.232499,
                     '_sitedir': '.',
                     '_sitepath': './test.png',
                     '_srcpath': './test/test.png',
@@ -75,26 +69,24 @@ rettgt2 = {'.': {'_path': '.',
              '_type': 'dir',
              'test.jpg': {'_ext': '.jpg',
                           '_filename': 'test',
-                          '_mtime': 1703254472.9648764,
                           '_sitedir': 'testdir',
                           '_sitepath': 'testdir/test.jpg',
                           '_srcpath': './test/testdir/test.jpg',
                           '_type': 'file'},
              'test.md': {'_ext': '.md',
                          '_filename': 'test',
-                         '_mtime': 1703251351.642544,
                          '_sitedir': 'testdir',
                          '_sitepath': 'testdir/test.md',
                          '_srcpath': './test/testdir/test.md',
                          '_type': 'file',
                           'authors': ['Waylan Limberg', 'John Doe'],
-                          'base_url': ['http://example.com'],
-                          'blank-value': [''],
+                          'base_url': 'http://example.com',
+                          'blank-value': '',
                           'content': '<p>This is the first paragraph of the document.</p>',
-                          'date': ['October 2, 2007'],
+                          'date': 'October 2, 2007',
                           'img': None,
-                          'summary': 'This is the first paragraph of the document.',
-                          'title': ['My Document'],
+                          'summary': 'A brief description of my document.',
+                          'title': 'My Document',
                           'url': 'testdir/test.html'}}
 }
 
@@ -104,7 +96,6 @@ rettgt3 = {'.': {'_path': '.',
        '_type': 'dir',
        'bla.md': {'_ext': '.md',
                   '_filename': 'bla',
-                  '_mtime': 1703251224.8210585,
                   '_sitedir': '.',
                   '_sitepath': './bla.md',
                   '_srcpath': './test/bla.md',
@@ -115,7 +106,6 @@ rettgt3 = {'.': {'_path': '.',
                   'url': './bla.html'},
        'test.png': {'_ext': '.png',
                     '_filename': 'test',
-                    '_mtime': 1703254450.232499,
                     '_sitedir': '.',
                     '_sitepath': './test.png',
                     '_srcpath': './test/test.png',
@@ -125,28 +115,25 @@ rettgt3 = {'.': {'_path': '.',
              '_type': 'dir',
              'test.jpg': {'_ext': '.jpg',
                           '_filename': 'test',
-                          '_mtime': 1703254472.9648764,
                           '_sitedir': 'testdir',
                           '_sitepath': 'testdir/test.jpg',
                           '_srcpath': './test/testdir/test.jpg',
                           '_type': 'file'},
              'test.md': {'_ext': '.md',
                          '_filename': 'test',
-                         '_mtime': 1703251351.642544,
                          '_sitedir': 'testdir',
                          '_sitepath': 'testdir/test.md',
                          '_srcpath': './test/testdir/test.md',
                          '_type': 'file',
                          'authors': ['Waylan Limberg', 'John Doe'],
-                         'base_url': ['http://example.com'],
-                         'blank-value': [''],
+                         'base_url': 'http://example.com',
+                         'blank-value': '',
                          'content': '<p>This is the first paragraph of the '
                                     'document.</p>',
-                         'date': ['October 2, 2007'],
+                         'date': 'October 2, 2007',
                          'img': None,
-                         'summary': 'This is the first paragraph of the '
-                                    'document.',
-                         'title': ['My Document'],
+                         'summary': 'A brief description of my document.',
+                         'title': 'My Document',
                          'url': 'testdir/test.html'}}}
 
 
@@ -155,7 +142,6 @@ rettgt4 = {'.': {'_path': '.',
        '_type': 'dir',
        'bla.md': {'_ext': '.md',
                   '_filename': 'bla',
-                  '_mtime': 1703251224.8210585,
                   '_sitedir': '.',
                   '_sitepath': './bla.md',
                   '_srcpath': './test/bla.md',
@@ -167,7 +153,6 @@ rettgt4 = {'.': {'_path': '.',
        'test.png': {'_ext': '.png',
                     '_filename': 'test',
                     'url': './test.png',
-                    '_mtime': 1703254450.232499,
                     '_sitedir': '.',
                     '_sitepath': './test.png',
                     '_srcpath': './test/test.png',
@@ -182,7 +167,6 @@ rettgt4 = {'.': {'_path': '.',
              '_type': 'dir',
              'test.jpg': {'_ext': '.jpg',
                           '_filename': 'test',
-                          '_mtime': 1703254472.9648764,
                           '_sitedir': 'testdir',
                           '_sitepath': 'testdir/test.jpg',
                           '_srcpath': './test/testdir/test.jpg',
@@ -195,21 +179,19 @@ rettgt4 = {'.': {'_path': '.',
                           'web': '_site/testdir/test_web.jpg'},
              'test.md': {'_ext': '.md',
                          '_filename': 'test',
-                         '_mtime': 1703251351.642544,
                          '_sitedir': 'testdir',
                          '_sitepath': 'testdir/test.md',
                          '_srcpath': './test/testdir/test.md',
                          '_type': 'file',
                          'authors': ['Waylan Limberg', 'John Doe'],
-                         'base_url': ['http://example.com'],
-                         'blank-value': [''],
+                         'base_url': 'http://example.com',
+                         'blank-value': '',
                          'content': '<p>This is the first paragraph of the '
                                     'document.</p>',
-                         'date': ['October 2, 2007'],
+                         'date': 'October 2, 2007',
                          'img': None,
-                         'summary': 'This is the first paragraph of the '
-                                    'document.',
-                         'title': ['My Document'],
+                         'summary': 'A brief description of my document.',
+                         'title': 'My Document',
                          'url': 'testdir/test.html'}}}
 
 
@@ -223,13 +205,21 @@ rettgt4 = {'.': {'_path': '.',
 #pprint(ret)
 #parse_path(ret["testdir"]["test.jpg"])
 #pprint(ret)
-
+def remove_mtime(d):
+    #print(d)
+    for k in list(d.keys()):
+        if type(d[k]) == dict:
+            remove_mtime(d[k])
+        elif k == "_mtime":
+            del d[k]       
 
 class AppieTest(unittest.TestCase):
 
     def test1_walkdir(self):
         self.maxDiff = None
-        self.assertDictEqual(walk_directory("./test")[1], rettgt)
+        d = walk_directory("./test")[1]
+        remove_mtime(d)
+        self.assertDictEqual(d, rettgt)
 
     def test2_parse_path(self):
         self.maxDiff = None

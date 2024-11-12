@@ -1,8 +1,8 @@
-Title:   My Document
-Summary: A brief description of my document.
-Authors: Waylan Limberg
+title:   My Document
+summary: A brief description of my document.
+authors: Waylan Limberg
          John Doe
-Date:    October 2, 2007
+date:    October 2, 2007
 blank-value:
 base_url: http://example.com
 
