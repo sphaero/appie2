@@ -116,6 +116,10 @@ def read_headers(html_content):
 
 
 def read_first_img(html_content):
+    """
+    Find the first <img> tag in the HTML and return it or None if 
+    none found
+    """
     # Assuming images are done with <img> tag in HTML
     match = re.search(r'<img[^>]*src=["\'](.*?)["\']', html_content)
     # Return the src attribute if found
@@ -125,7 +129,7 @@ def read_first_img(html_content):
         return None
 
 def parse_dir(tree, **params):
-    # parse the tree recursively
+    """Parse a directory (tree) recursively"""
     for k, v in tree.items():
         # don't parse leaves
         if type(v) != dict:
@@ -141,8 +145,8 @@ def parse_dir(tree, **params):
 
 def parse_path(file, **params):
     """
-    Parse the filepath in the folder, we use the folder name to match a jinja
-    template
+    Parse the filepath in the folder, we use the folder name to match a 
+    jinja template
     """
     sitedir = file["_sitedir"]
     folder = os.path.dirname(file["_sitedir"])
@@ -159,7 +163,7 @@ def parse_path(file, **params):
         template = env.get_template('default.html')
         
     # match file extensions
-    if ext == ".md":
+    if ext == ".md": # Parse Markdown file
         siteurl = os.path.join( file["_sitedir"], filename )+".html"
         md = markdown.Markdown(
                         extensions=[
@@ -183,7 +187,7 @@ def parse_path(file, **params):
                     })
         sitehtml = template.render(**file, **params)
         fwrite( "{}.html".format(outfilepath), sitehtml)
-    elif ext == ".html":
+    elif ext == ".html": # Parse HTML file
         siteurl = os.path.join( file["_sitedir"], filename )+".html"
         html = fread(file["_srcpath"])
         # try to find meta data (<!--) in html
@@ -217,6 +221,7 @@ def parse_path(file, **params):
         taglist.append(file)
 
 def parse_png(file, outfilepath, **params):
+    """parse png image, save its mimetype and create thumbnails"""
     shutil.copy(file["_srcpath"], outfilepath + ".png")
     outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
     file['mimetype'] = 'image/png'   # https://www.w3.org/Graphics/PNG/
@@ -224,6 +229,7 @@ def parse_png(file, outfilepath, **params):
     resize_img(file, outfilepath, **params)
 
 def parse_jpg(file, outfilepath, **params):
+    """parse jpg image, save its mimetype and create thumbnails"""
     shutil.copy(file["_srcpath"], outfilepath + ".jpg")
     outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
     file['mimetype'] = 'image/jpg'
@@ -231,6 +237,7 @@ def parse_jpg(file, outfilepath, **params):
     resize_img(file, outfilepath, **params)
 
 def resize_img(file, outfilepath, **params):
+    """create different sized images of the provided image"""
     jpg_filename = outfilepath + "_web.jpg"
     thumb_filename = outfilepath + "_thumb.jpg"
 
@@ -247,6 +254,7 @@ def resize_img(file, outfilepath, **params):
         log("Image {0} is not a valid color image (mode={1})"
                        .format(filepath, img.mode))
 
+    # update the file's meta data in the dictionary
     file.update({
             'size': size,              # tuple (width,height)
             'web': jpg_filename,
@@ -255,6 +263,7 @@ def resize_img(file, outfilepath, **params):
             })
 
 def generate_index(folder, **params):
+    """Generate an index file for the provided folder"""
     foldername = os.path.dirname(folder["_path"]) or folder["_path"]
     try:
         tpl = env.get_template('{}_index.html'.format(foldername))
@@ -266,6 +275,7 @@ def generate_index(folder, **params):
     fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
 
 def generate_tags(taglist, **params):
+    """Generate a tags index for the provided taglist"""
     try:
         tpl = env.get_template('tags_index.html')
         print("using the tags_index template")
