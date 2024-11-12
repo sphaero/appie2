@@ -1,0 +1,154 @@
+body {
+    max-width: 800px; /* Set your desired maximum width for desktop */
+    margin: 0px auto;
+    padding: 0px 20px;
+    color: #DDD;
+    background-color: #455c63;
+    font-family: "Lucida Console", Monaco, monospace;
+    line-height: 1.5em;
+    min-height: 100vh;
+}
+
+@media (max-width: 767px) {
+    body {
+        max-width: none; /* Reset max-width for mobile devices */
+        padding: 0px;
+    }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 0;
+    line-height: 1.2em;
+    margin-top: 1em;
+    color: #BAA39C;
+}
+
+a:link, a:visited {
+    color: #BAA39C;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover, a:active {
+    color: #BAA39C;
+    text-decoration: underline
+}
+
+
+/* Navigation panel */
+nav {
+    background: #333333;
+    border-bottom: thin solid #111111;
+    line-height: 3em;
+    height: 3em;
+    background-image:url("logo-light.svg");
+    background-repeat: no-repeat;
+    background-position: top 1px left 4px;
+    background-size: contain;
+}
+
+nav img {
+    height: 3em;
+    display
+}
+
+nav a:first-child, 
+nav a:link:first-child, 
+nav a:visited:first-child, 
+nav a:hover:first-child, 
+nav a:active:first-child {
+    color: transparent;
+}
+
+nav a {
+    margin: 1em;
+}
+
+nav a:link, nav a:visited {
+    color: #cccccc;
+}
+
+nav a:hover, nav a:active {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+}
+
+footer section p {
+    font-size: 0.8em;
+}
+
+footer a {
+    margin-right: 1em;
+}
+
+footer a:last-child {
+    margin-right: 0;
+}
+
+
+/* Posts */
+article {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+article h2 a:link, article h2 a:visited,
+article h1 a:link, article h1 a:visited,
+.more:link, .more:visited {
+    color: #333333;
+}
+
+article h2 a:hover, article h2 a:active,
+article h1 a:hover, article h1 a:active,
+.more:hover, .more:active {
+    color: #777777;
+}
+
+p.meta {
+    margin-top: 0;
+    font-size: 0.8em;
+    color: #777777;
+    font-style: italic;
+}
+
+p.summary {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+
+div .more {
+    margin-top: 0;
+    font-weight: bold;
+}
+
+
+/* RSS */
+.rss {
+    padding: 0.3em 0.35em;
+    border-radius: 0.25em;
+    font-size: 0.75em;
+    font-weight: bold;
+}
+
+.rss:link, .rss:visited, .rss:hover, .rss:active {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.rss:link, .rss:visited {
+    background: #ff6600;
+}
+
+.rss:hover, .rss:active {
+    background: #ff8822;
+}

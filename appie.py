@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Appie2 is based on the original Appie from z25.org and makesite.py
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Sunaina Pai
+# Copyright (c) 2025 Arnaud Loonstra
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -140,7 +140,8 @@ def parse_dir(tree, **params):
             generate_index(v, **params)
         else:
             parse_path(v, **params)
-    generate_tags(params["_tags"], **params)
+    if params.get("_tags"):
+        generate_tags(params["_tags"], **params)
 
 
 def parse_path(file, **params):
@@ -243,7 +244,9 @@ def resize_img(file, outfilepath, **params):
 
     img = Image.open(file["_srcpath"])
     size = img.size
-    if img.mode in ('RGB', 'RGBA', 'CMYK', 'I'):
+    if img.mode == 'RGBA':
+        img = img.convert('RGB')
+    if img.mode in ('RGB', 'CMYK', 'I'):
         img.thumbnail(params.get('jpg_size', (1280, 720)), Image.LANCZOS)
         img.save(jpg_filename, "JPEG", quality=80,
                     optimize=True, progressive=True)

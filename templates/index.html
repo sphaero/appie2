@@ -12,6 +12,7 @@
 <main>
     {{ content }}
     {% for entry in entries %}
+    {% if entry.summary is defined %}
     <section>
         <h1><a href="{{ base_path }}{{entry.url}}"></h1>
             {{ entry.title }}
@@ -26,6 +27,7 @@
             {% endif %}
         </p>
     </section>
+    {% endif %}
     {% endfor %}
 </index>
 </main>
