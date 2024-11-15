@@ -62,6 +62,30 @@ def fix_meta(meta):
     for k,v in meta.items():
         if len(v) == 1:
             meta[k] = v[0]
+
+def is_source_newer(source: str, target: str) -> bool:
+    """
+    Checks if the source file is newer than the target file.
+    """
+    try:
+        # Check if the source file exists
+        if not os.path.exists(source):
+            raise FileNotFoundError(f"Source file '{source}' does not exist.")
+        
+        # Check if the target file exists
+        if not os.path.exists(target):
+            # If the target doesn't exist, consider source as newer
+            return True
+        
+        # Get the modification times
+        source_mtime = os.path.getmtime(source)
+        target_mtime = os.path.getmtime(target)
+        
+        # Compare the modification times
+        return source_mtime > target_mtime
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
     
 def walk_directory(directory, **params):
     """
@@ -143,23 +167,22 @@ def parse_dir(tree, **params):
     if params.get("_tags"):
         generate_tags(params["_tags"], **params)
 
-
 def parse_path(file, **params):
     """
     Parse the filepath in the folder, we use the folder name to match a 
     jinja template
     """
     sitedir = file["_sitedir"]
-    folder = os.path.dirname(file["_sitedir"])
+    folder = os.path.dirname(file["_sitepath"])
     filename = file["_filename"]
     ext = file["_ext"]
     dirname = os.path.basename(folder)
     outfilepath = os.path.join( "_site", file["_sitedir"], filename )
-    
+
     # try to load a corresponding template
     try:
         template = env.get_template('{}.html'.format(dirname))
-        print("using the {} template for {}".format(dirname, file["_srcpath"]))
+        print("using the {}.html template for {}".format(dirname, file["_srcpath"]))
     except Exception as e:
         template = env.get_template('default.html')
         
@@ -177,6 +200,8 @@ def parse_path(file, **params):
         # generate the html from the .md file
         html = md.convert(fread(file["_srcpath"]))
         fix_meta(md.Meta)
+        if not md.Meta.get('img') and md.Meta.get('images'):
+            md.Meta['img'] = md.Meta.get('images')[0]
         if not md.Meta.get('img'):
             md.Meta['img'] = read_first_img(html)
         if not md.Meta.get('summary'):
@@ -213,8 +238,9 @@ def parse_path(file, **params):
     elif ext == ".png":
         parse_png(file, outfilepath, **params)
     else:
-        # just copy
-        shutil.copy(file["_srcpath"], outfilepath + ext)
+        if is_source_newer(file.get("_srcpath"), outfilepath + ext):
+           # just copy
+            shutil.copy(file["_srcpath"], outfilepath + ext)
     # save any tags we found to params
     for t in file.get("tags", []):
         if not params.get("_tags").get(t): params["_tags"][t] = []
@@ -223,7 +249,8 @@ def parse_path(file, **params):
 
 def parse_png(file, outfilepath, **params):
     """parse png image, save its mimetype and create thumbnails"""
-    shutil.copy(file["_srcpath"], outfilepath + ".png")
+    if is_source_newer(file.get("_srcpath"), outfilepath + ".png"):
+        shutil.copy(file["_srcpath"], outfilepath + ".png")
     outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
     file['mimetype'] = 'image/png'   # https://www.w3.org/Graphics/PNG/
     file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".png"
@@ -231,7 +258,8 @@ def parse_png(file, outfilepath, **params):
 
 def parse_jpg(file, outfilepath, **params):
     """parse jpg image, save its mimetype and create thumbnails"""
-    shutil.copy(file["_srcpath"], outfilepath + ".jpg")
+    if is_source_newer(file.get("_srcpath"), outfilepath + ".jpg"):
+        shutil.copy(file["_srcpath"], outfilepath + ".jpg")
     outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
     file['mimetype'] = 'image/jpg'
     file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".jpg"
@@ -241,40 +269,52 @@ def resize_img(file, outfilepath, **params):
     """create different sized images of the provided image"""
     jpg_filename = outfilepath + "_web.jpg"
     thumb_filename = outfilepath + "_thumb.jpg"
-
     img = Image.open(file["_srcpath"])
     size = img.size
-    if img.mode == 'RGBA':
-        img = img.convert('RGB')
-    if img.mode in ('RGB', 'CMYK', 'I'):
-        img.thumbnail(params.get('jpg_size', (1280, 720)), Image.LANCZOS)
-        img.save(jpg_filename, "JPEG", quality=80,
-                    optimize=True, progressive=True)
-        img.thumbnail(params.get('thumb_size', (384, 216)), Image.LANCZOS)
-        img.save(thumb_filename, "JPEG", quality=80,
-                    optimize=True, progressive=True)
-    else:
-        log("Image {0} is not a valid color image (mode={1})"
-                       .format(filepath, img.mode))
+    if (is_source_newer(file.get("_srcpath"), jpg_filename) or
+        is_source_newer(file.get("_srcpath"), thumb_filename)):
+    
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
+        if img.mode in ('RGB', 'CMYK', 'I'):
+            print("saving", jpg_filename)
+
+            img.thumbnail(params.get('jpg_size', (1280, 720)), Image.LANCZOS)
+            img.save(jpg_filename, "JPEG", quality=80,
+                        optimize=True, progressive=True)
+            img.thumbnail(params.get('thumb_size', (384, 216)), Image.LANCZOS)
+            img.save(thumb_filename, "JPEG", quality=80,
+                        optimize=True, progressive=True)
+        else:
+            log("Image {0} is not a valid color image (mode={1})"
+                           .format(filepath, img.mode))
 
     # update the file's meta data in the dictionary
     file.update({
             'size': size,              # tuple (width,height)
-            'web': jpg_filename,
-            'thumb': thumb_filename,
+            'web': file["_filename"] + "_web.jpg",
+            'thumb': file["_filename"] + "_thumb.jpg",
             'md5': 'todo'
             })
 
 def generate_index(folder, **params):
     """Generate an index file for the provided folder"""
+    # Trick to debug jinja2 parsing
+    #from jinja2 import Template
+    #tpl = Template("Item1: {{ folder['test.jpg'] }}, Item2: {{ ['bewogen.md'] }}, Param1: {{folder['_srcpath'] }}")
+    #sitehtml = tpl.render(entries=entries, folder=folder, **params)
+    #print(sitehtml)
+    #import pdb
+    #pdb.set_trace()
     foldername = os.path.dirname(folder["_path"]) or folder["_path"]
     try:
         tpl = env.get_template('{}_index.html'.format(foldername))
-        print("using the {} template for {}".format(foldername, folder["_srcpath"]))
+        print("using the {}_index.html template for {}".format(foldername, folder["_srcpath"]))
     except Exception as e:
         tpl = env.get_template('index.html')
+
     entries = tuple(v for k, v in folder.items() if type(v) == dict)
-    sitehtml = tpl.render(entries=entries, **folder, **params)
+    sitehtml = tpl.render(entries=entries, folder=folder, **params)
     fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
 
 def generate_tags(taglist, **params):
@@ -299,10 +339,12 @@ def generate_tags(taglist, **params):
     fwrite( os.path.join("_site", "tags", "index.html"), sitehtml)
 
 def main():
-    # Create a new _site directory from scratch.
-    if os.path.isdir('_site'):
-        shutil.rmtree('_site/')
-    shutil.copytree('static', '_site')
+    from_scratch = False
+    if from_scratch or not os.path.isdir('_site'):
+        # Create a new _site directory from scratch.
+        if os.path.isdir('_site'):
+            shutil.rmtree('_site/')
+        shutil.copytree('static', '_site')
 
     # Default parameters.
     params = {
