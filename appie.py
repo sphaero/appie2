@@ -289,6 +289,7 @@ def resize_img(file, outfilepath, **params):
             log("Image {0} is not a valid color image (mode={1})"
                            .format(filepath, img.mode))
 
+    img.close()
     # update the file's meta data in the dictionary
     file.update({
             'size': size,              # tuple (width,height)
