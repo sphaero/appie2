@@ -212,28 +212,33 @@ def remove_mtime(d):
             remove_mtime(d[k])
         elif k == "_mtime":
             del d[k]       
-
+params = {
+        'base_path': '/',
+        'output_path': '_site',
+        '_tags': {},
+    }
+    
 class AppieTest(unittest.TestCase):
 
     def test1_walkdir(self):
         self.maxDiff = None
-        d = walk_directory("./test")[1]
+        d = walk_directory("./test", **params)[1]
         remove_mtime(d)
         self.assertDictEqual(d, rettgt)
 
     def test2_parse_path(self):
         self.maxDiff = None
-        parse_path(rettgt["testdir"]["test.md"])
+        parse_path(rettgt["testdir"]["test.md"], **params)
         self.assertDictEqual(rettgt["testdir"], rettgt2["testdir"])
 
     def test3_parse_path(self):
         self.maxDiff = None
-        parse_path(rettgt["."]["bla.md"])
+        parse_path(rettgt["."]["bla.md"], **params)
         self.assertDictEqual(rettgt, rettgt3)
 
     def test4_parse_dir(self):
         self.maxDiff = None
-        parse_dir(rettgt)
+        parse_dir(rettgt, **params)
         self.assertDictEqual(rettgt, rettgt4)
         def checkdir(d):
             for k,v in d.items():
