@@ -38,6 +38,17 @@ import json
 import datetime
 import markdown
 from PIL import Image
+# A very simple plugin system. Just create a plugins.py file
+# with the match_dir and match_file function. If the file doesn't
+# exist we create an empty plugin as a class
+class plugins:
+    def match_dir(*args, **kwargs):
+        pass
+    def match_file(*args, **kwargs):
+        pass
+if os.path.isfile("plugins.py"):
+    import plugins
+
 
 # Load jinja templates
 from jinja2 import Environment, FileSystemLoader
@@ -154,16 +165,20 @@ def read_first_img(html_content):
 
 def parse_dir(tree, **params):
     """Parse a directory (tree) recursively"""
-    for k, v in tree.items():
-        # don't parse leaves
-        if type(v) != dict:
-            continue
-        elif v["_type"] == "dir":
-            os.makedirs(os.path.join("_site", v["_path"]), exist_ok=True)
-            parse_dir(v, **params)  #recurse
-            generate_index(v, **params)
-        else:
-            parse_path(v, **params)
+    # first check if plugins.py wants this dir
+    if not plugins.match_dir(tree, **params):
+        for k, v in tree.items():
+            # don't parse leaves
+            if type(v) != dict:
+                continue
+            elif v["_type"] == "dir":
+                os.makedirs(os.path.join("_site", v["_path"]), exist_ok=True)
+                parse_dir(v, **params)  #recurse
+                generate_index(v, **params)
+            else:
+                # first check if a plugin wants this file
+                if not plugins.match_file(v, **params):
+                    parse_path(v, **params)
     if params.get("_tags"):
         generate_tags(params["_tags"], **params)
 
@@ -315,6 +330,7 @@ def generate_index(folder, **params):
         tpl = env.get_template('index.html')
 
     entries = tuple(v for k, v in folder.items() if type(v) == dict)
+    entries = sorted(entries, key=lambda x: x.get("_filename"))
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
     fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
 
@@ -345,7 +361,7 @@ def main():
         # Create a new _site directory from scratch.
         if os.path.isdir('_site'):
             shutil.rmtree('_site/')
-        shutil.copytree('static', '_site')
+    shutil.copytree('static', '_site', dirs_exist_ok=True)
 
     # Default parameters.
     params = {
