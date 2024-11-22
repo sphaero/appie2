@@ -356,13 +356,6 @@ def generate_tags(taglist, **params):
     fwrite( os.path.join(params["output_path"], "tags", "index.html"), sitehtml)
 
 def main():
-    from_scratch = False
-    if from_scratch or not os.path.isdir('_site'):
-        # Create a new _site directory from scratch.
-        if os.path.isdir('_site'):
-            shutil.rmtree('_site/')
-    shutil.copytree('static', '_site', dirs_exist_ok=True)
-
     # Default parameters.
     params = {
         'base_path': '/',
@@ -376,6 +369,13 @@ def main():
     # If params.json exists, load it.
     if os.path.isfile('params.json'):
         params.update(json.loads(fread('params.json')))
+
+    from_scratch = False
+    if from_scratch or not os.path.isdir(params['output_path']):
+        # Create a new _site directory from scratch.
+        if os.path.isdir(params['output_path']):
+            shutil.rmtree(params['output_path'])
+    shutil.copytree('static', params['output_path'], dirs_exist_ok=True)
 
     # walk the content dir to a dict and list of folders
     file_times, tree = walk_directory("./content")
