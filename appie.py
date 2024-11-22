@@ -172,7 +172,7 @@ def parse_dir(tree, **params):
             if type(v) != dict:
                 continue
             elif v["_type"] == "dir":
-                os.makedirs(os.path.join("_site", v["_path"]), exist_ok=True)
+                os.makedirs(os.path.join(params["output_path"], v["_path"]), exist_ok=True)
                 parse_dir(v, **params)  #recurse
                 generate_index(v, **params)
             else:
@@ -192,7 +192,7 @@ def parse_path(file, **params):
     filename = file["_filename"]
     ext = file["_ext"]
     dirname = os.path.basename(folder)
-    outfilepath = os.path.join( "_site", file["_sitedir"], filename )
+    outfilepath = os.path.join(params["output_path"], file["_sitedir"], filename )
 
     # try to load a corresponding template
     try:
@@ -266,7 +266,7 @@ def parse_png(file, outfilepath, **params):
     """parse png image, save its mimetype and create thumbnails"""
     if is_source_newer(file.get("_srcpath"), outfilepath + ".png"):
         shutil.copy(file["_srcpath"], outfilepath + ".png")
-    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
+    outfilepath = os.path.join(params["output_path"], os.path.splitext(file["_sitepath"])[0])
     file['mimetype'] = 'image/png'   # https://www.w3.org/Graphics/PNG/
     file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".png"
     resize_img(file, outfilepath, **params)
@@ -275,7 +275,7 @@ def parse_jpg(file, outfilepath, **params):
     """parse jpg image, save its mimetype and create thumbnails"""
     if is_source_newer(file.get("_srcpath"), outfilepath + ".jpg"):
         shutil.copy(file["_srcpath"], outfilepath + ".jpg")
-    outfilepath = os.path.join("_site", os.path.splitext(file["_sitepath"])[0])
+    outfilepath = os.path.join(params["output_path"], os.path.splitext(file["_sitepath"])[0])
     file['mimetype'] = 'image/jpg'
     file['url'] = os.path.join( file["_sitedir"], file["_filename"] )+".jpg"
     resize_img(file, outfilepath, **params)
@@ -332,7 +332,7 @@ def generate_index(folder, **params):
     entries = tuple(v for k, v in folder.items() if type(v) == dict)
     entries = sorted(entries, key=lambda x: x.get("_filename"))
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
-    fwrite( os.path.join("_site", folder["_path"], "index.html"), sitehtml)    
+    fwrite( os.path.join(params["output_path"], folder["_path"], "index.html"), sitehtml)    
 
 def generate_tags(taglist, **params):
     """Generate a tags index for the provided taglist"""
@@ -349,11 +349,11 @@ def generate_tags(taglist, **params):
         foldername = os.path.join("tags", tag)
         sitehtml = tpl.render(title=tag, content="<h1>tagged with "+tag+"</h1>",
                                 entries=entries, **params)
-        fwrite( os.path.join("_site", "tags", tag + ".html"), sitehtml)
+        fwrite( os.path.join(params["output_path"], "tags", tag + ".html"), sitehtml)
     # finally write the tag index
     sitehtml = tpl.render(title="tags", content="<h1>All tags</h1>",
                                 entries=alltags, **params)
-    fwrite( os.path.join("_site", "tags", "index.html"), sitehtml)
+    fwrite( os.path.join(params["output_path"], "tags", "index.html"), sitehtml)
 
 def main():
     from_scratch = False
@@ -366,13 +366,13 @@ def main():
     # Default parameters.
     params = {
         'base_path': '/',
+        'output_path': '_site',
         'subtitle': 'Lorem Ipsum',
         'author': 'Admin',
         'site_url': 'http://localhost:8000',
         'current_year': datetime.datetime.now().year,
         '_tags': {},
     }
-
     # If params.json exists, load it.
     if os.path.isfile('params.json'):
         params.update(json.loads(fread('params.json')))
