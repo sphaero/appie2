@@ -341,7 +341,8 @@ def generate_index(folder, **params):
     except Exception as e:
         tpl = env.get_template('index.html')
 
-    entries = tuple(v for k, v in folder.items() if type(v) == dict)
+    entries = tuple(v for k, v in folder.items() if type(v) == dict and v.get("_type") == "file")
+    print(entries)
     entries = sorted(entries, key=lambda x: x.get("_filename"))
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
     fwrite( os.path.join(params["output_path"], folder["_path"], "index.html"), sitehtml)    
