@@ -5,47 +5,46 @@ from appie import walk_directory, parse_path, parse_dir
 from pprint import pprint
 
 rettgt = {
-            '.': 
-            {
-                '_path': '.',
-                '_srcpath': './test',
-                '_type': 'dir',
-                'bla.md': 
-                {
-                      '_ext': '.md',
-                      '_filename': 'bla',
-                      '_sitedir': '.',
-                      '_sitepath': './bla.md',
-                      '_srcpath': './test/bla.md',
-                      '_type': 'file'
-                },
-                'test.png': 
-                {
-                    '_ext': '.png',
-                    '_filename': 'test',
-                    '_sitedir': '.',
-                    '_sitepath': './test.png',
-                    '_srcpath': './test/test.png',
-                    '_type': 'file'
-                }
-            },
-            'testdir': 
-            {
-                '_path': 'testdir',
-                '_srcpath': './test/testdir',
-                '_type': 'dir',
-                'test.jpg': {'_ext': '.jpg',
-                          '_filename': 'test',
-                          '_sitedir': 'testdir',
-                          '_sitepath': 'testdir/test.jpg',
-                          '_srcpath': './test/testdir/test.jpg',
-                          '_type': 'file'},
-             'test.md': {'_ext': '.md',
-                         '_filename': 'test',
-                         '_sitedir': 'testdir',
-                         '_sitepath': 'testdir/test.md',
-                         '_srcpath': './test/testdir/test.md',
-                         '_type': 'file'}}}
+        '_path': '',
+        '_srcpath': './test',
+        '_type': 'dir',
+        'bla.md': 
+        {
+              '_ext': '.md',
+              '_filename': 'bla',
+              '_sitedir': '',
+              '_sitepath': 'bla.md',
+              '_srcpath': './test/bla.md',
+              '_type': 'file'
+        },
+        'test.png': 
+        {
+            '_ext': '.png',
+            '_filename': 'test',
+            '_sitedir': '',
+            '_sitepath': 'test.png',
+            '_srcpath': './test/test.png',
+            '_type': 'file'
+        },
+        'testdir': 
+        {
+            '_path': 'testdir',
+            '_srcpath': './test/testdir',
+            '_type': 'dir',
+            'test.jpg': {'_ext': '.jpg',
+                      '_filename': 'test',
+                      '_sitedir': 'testdir',
+                      '_sitepath': 'testdir/test.jpg',
+                      '_srcpath': './test/testdir/test.jpg',
+                      '_type': 'file'},
+         'test.md': {'_ext': '.md',
+                     '_filename': 'test',
+                     '_sitedir': 'testdir',
+                     '_sitepath': 'testdir/test.md',
+                     '_srcpath': './test/testdir/test.md',
+                     '_type': 'file'}
+    }
+}
 
 
 
@@ -91,26 +90,26 @@ rettgt2 = {'.': {'_path': '.',
 }
 
 
-rettgt3 = {'.': {'_path': '.',
+rettgt3 = {'_path': '',
        '_srcpath': './test',
        '_type': 'dir',
        'bla.md': {'_ext': '.md',
                   '_filename': 'bla',
-                  '_sitedir': '.',
-                  '_sitepath': './bla.md',
+                  '_sitedir': '',
+                  '_sitepath': 'bla.md',
                   '_srcpath': './test/bla.md',
                   '_type': 'file',
                   'content': '',
                   'img': None,
                   'summary': None,
-                  'url': './bla.html'},
+                  'url': 'bla.html'},
        'test.png': {'_ext': '.png',
                     '_filename': 'test',
-                    '_sitedir': '.',
-                    '_sitepath': './test.png',
+                    '_sitedir': '',
+                    '_sitepath': 'test.png',
                     '_srcpath': './test/test.png',
-                    '_type': 'file'}},
- 'testdir': {'_path': 'testdir',
+                    '_type': 'file'},
+        'testdir': {'_path': 'testdir',
              '_srcpath': './test/testdir',
              '_type': 'dir',
              'test.jpg': {'_ext': '.jpg',
@@ -137,32 +136,32 @@ rettgt3 = {'.': {'_path': '.',
                          'url': 'testdir/test.html'}}}
 
 
-rettgt4 = {'.': {'_path': '.',
+rettgt4 = {'_path': '',
        '_srcpath': './test',
        '_type': 'dir',
        'bla.md': {'_ext': '.md',
                   '_filename': 'bla',
-                  '_sitedir': '.',
-                  '_sitepath': './bla.md',
+                  '_sitedir': '',
+                  '_sitepath': 'bla.md',
                   '_srcpath': './test/bla.md',
                   '_type': 'file',
                   'content': '',
                   'img': None,
                   'summary': None,
-                  'url': './bla.html'},
+                  'url': 'bla.html'},
        'test.png': {'_ext': '.png',
                     '_filename': 'test',
-                    'url': './test.png',
-                    '_sitedir': '.',
-                    '_sitepath': './test.png',
+                    'url': 'test.png',
+                    '_sitedir': '',
+                    '_sitepath': 'test.png',
                     '_srcpath': './test/test.png',
                     '_type': 'file',
                     'md5': 'todo',
                     'mimetype': 'image/png',
                     'size': (200, 200),
                     'thumb': 'test_thumb.jpg',
-                    'web': 'test_web.jpg'}},
- 'testdir': {'_path': 'testdir',
+                    'web': 'test_web.jpg'},
+        'testdir': {'_path': 'testdir',
              '_srcpath': './test/testdir',
              '_type': 'dir',
              'test.jpg': {'_ext': '.jpg',
@@ -222,20 +221,23 @@ class AppieTest(unittest.TestCase):
 
     def test1_walkdir(self):
         self.maxDiff = None
-        d = walk_directory("./test", **params)[1]
-        remove_mtime(d)
+        d = walk_directory("./test", **params)
+        #remove_mtime(d)
         self.assertDictEqual(d, rettgt)
 
+    #@unittest.skip
     def test2_parse_path(self):
         self.maxDiff = None
         parse_path(rettgt["testdir"]["test.md"], **params)
         self.assertDictEqual(rettgt["testdir"], rettgt2["testdir"])
 
+    #@unittest.skip
     def test3_parse_path(self):
         self.maxDiff = None
-        parse_path(rettgt["."]["bla.md"], **params)
+        parse_path(rettgt["bla.md"], **params)
         self.assertDictEqual(rettgt, rettgt3)
 
+    #@unittest.skip
     def test4_parse_dir(self):
         self.maxDiff = None
         parse_dir(rettgt, **params)

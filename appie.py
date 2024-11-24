@@ -98,39 +98,51 @@ def is_source_newer(source: str, target: str) -> bool:
         print(f"Error: {e}")
         return False
     
-def walk_directory(directory, **params):
+def walk_directory(directory, basepath=None, **params):
     """
     Walk through a directory and collect file meta data.
     Return a dict containing all entries
     """
-    file_times = {}
-    folders = set()
-    tree = {}
+    if basepath == None:
+        basepath=directory
+        
+    dir_dict = {'_path': '',
+                '_srcpath': directory,
+                '_type': 'dir',
+                }
+    try:
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                # entry.name filename
+                # entry.path fullpath relative to called directory
+                relpath = os.path.relpath(entry.path, basepath)
+                relfolder = os.path.dirname(relpath)
+                if entry.is_dir():
+                    # Recursively include subdirectory
+                    d = walk_directory(entry.path, 
+                                       basepath,
+                                       **params)
+                    d.update({ "_type": "dir", 
+                               "_path": relpath, 
+                               "_srcpath": entry.path })
 
-    for foldername, subfolders, filenames in os.walk(directory):
-        folders.add(foldername)
-        relfolder = os.path.relpath(foldername, directory)
-        d = { "_type": "dir", "_path": relfolder, "_srcpath": foldername }
-        for filename in filenames:
-            filepath = os.path.join(foldername, filename)
-            userfilename, ext = os.path.splitext(filename)
-            relfile = os.path.join(relfolder, filename) # same? os.path.relpath(filepath, directory)
-            mtime = os.path.getmtime(filepath)
-            f = { 
-                "_type": "file", 
-                "_mtime": mtime,
-                "_srcpath": filepath,
-                "_sitedir": relfolder,
-                "_filename": userfilename,
-                "_ext": ext,
-                "_sitepath": relfile
-            }
-            d[filename] = f
-            
-            file_times[filepath] = { "mtime": mtime }
-        tree[relfolder] = d
-            
-    return file_times, tree #dict((k,v) for k,v in zip(folders, [None]*len(folders)))
+                    dir_dict[entry.name] = d
+                else:
+                    # Include file as a leaf
+                    filepath = os.path.join(directory, entry.name)
+                    userfilename, ext = os.path.splitext(entry.name)
+                    relfile = os.path.join(relfolder, entry.name) # same? os.path.relpath(filepath, directory)
+                    dir_dict[entry.name] = { 
+                        "_type": "file", 
+                        "_srcpath": entry.path,
+                        "_sitedir": relfolder,
+                        "_filename": userfilename,
+                        "_ext": ext,
+                        "_sitepath": relfile
+                    }
+    except PermissionError:
+        dir_dict["error"] = "Permission Denied"
+    return dir_dict
 
 def read_first_paragraph(html_content):
     """return the first paragraph found in the html content"""
@@ -378,7 +390,7 @@ def main():
     shutil.copytree('static', params['output_path'], dirs_exist_ok=True)
 
     # walk the content dir to a dict and list of folders
-    file_times, tree = walk_directory("./content")
+    tree = walk_directory("./content", **params)
                     
     # get nav entries from the root dir:
     if not params.get("nav"):
