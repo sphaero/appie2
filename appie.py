@@ -301,8 +301,8 @@ def resize_img(file, outfilepath, **params):
             img.save(thumb_filename, "JPEG", quality=80,
                         optimize=True, progressive=True)
         else:
-            log("Image {0} is not a valid color image (mode={1})"
-                           .format(filepath, img.mode))
+            print("Image {0} is not a valid color image (mode={1})"
+                           .format(file["_srcpath"], img.mode))
 
     img.close()
     # update the file's meta data in the dictionary
