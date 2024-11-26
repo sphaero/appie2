@@ -41,14 +41,14 @@ from PIL import Image
 # A very simple plugin system. Just create a plugins.py file
 # with the match_dir and match_file function. If the file doesn't
 # exist we create an empty plugin as a class
-class plugins:
-    def match_dir(*args, **kwargs):
-        pass
-    def match_file(*args, **kwargs):
-        pass
-if os.path.isfile("plugins.py"):
+if os.path.isfile("plugins.py") and __name__ == "__main__":
     import plugins
-
+else:
+    class plugins:
+        def match_dir(*args, **kwargs):
+            pass
+        def match_file(*args, **kwargs):
+            pass
 
 # Load jinja templates
 from jinja2 import Environment, FileSystemLoader
@@ -301,7 +301,7 @@ def resize_img(file, outfilepath, **params):
     if (is_source_newer(file.get("_srcpath"), jpg_filename) or
         is_source_newer(file.get("_srcpath"), thumb_filename)):
     
-        if img.mode == 'RGBA':
+        if img.mode == 'RGBA' or img.mode == 'P':
             img = img.convert('RGB')
         if img.mode in ('RGB', 'CMYK', 'I'):
             print("saving", jpg_filename)
@@ -342,7 +342,6 @@ def generate_index(folder, **params):
         tpl = env.get_template('index.html')
 
     entries = tuple(v for k, v in folder.items() if type(v) == dict and v.get("_type") == "file")
-    print(entries)
     entries = sorted(entries, key=lambda x: x.get("_filename"))
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
     fwrite( os.path.join(params["output_path"], folder["_path"], "index.html"), sitehtml)    
