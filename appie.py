@@ -227,10 +227,13 @@ def parse_path(file, **params):
         # generate the html from the .md file
         html = md.convert(fread(file["_srcpath"]))
         fix_meta(md.Meta)
-        if not md.Meta.get('img') and md.Meta.get('images'):
-            md.Meta['img'] = md.Meta.get('images')[0]
-        if not md.Meta.get('img'):
-            md.Meta['img'] = read_first_img(html)
+        if not file.get('thumbnail'):
+            if not md.Meta.get('thumbnail') and md.Meta.get('images'):
+                file['thumbnail'] = md.Meta.get('images')[0]
+            if not file.get('thumbnail'):
+                img = read_first_img(html)
+                if img:
+                    file['thumbnail'] = img
         if not md.Meta.get('summary'):
             md.Meta['summary'] = read_first_paragraph(html)
         file.update(md.Meta)
@@ -250,7 +253,7 @@ def parse_path(file, **params):
         summary = read_first_paragraph(html)
         file.update({
             "content": html,
-            "img": firstimg, 
+            "thumbnail": firstimg, 
             "summary": summary, 
             "url": siteurl
             })
@@ -332,8 +335,9 @@ def generate_index(folder, **params):
     #tpl = Template("Item1: {{ folder['test.jpg'] }}, Item2: {{ ['bewogen.md'] }}, Param1: {{folder['_srcpath'] }}")
     #sitehtml = tpl.render(entries=entries, folder=folder, **params)
     #print(sitehtml)
-    #import pdb
-    #pdb.set_trace()
+    if folder.get("_skipindex"):
+        print("Skip index requested for {}".format(folder["_srcpath"]))
+        return # skip index requested so return
     foldername = os.path.dirname(folder["_path"]) or folder["_path"]
     try:
         tpl = env.get_template('{}_index.html'.format(foldername))
@@ -341,8 +345,8 @@ def generate_index(folder, **params):
     except Exception as e:
         tpl = env.get_template('index.html')
 
-    entries = tuple(v for k, v in folder.items() if type(v) == dict and v.get("_type") == "file")
-    entries = sorted(entries, key=lambda x: x.get("_filename"))
+    entries = tuple(v for k, v in folder.items() if type(v) == dict)
+    entries = sorted(entries, key=lambda x: x.get("_filename", ""))
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
     fwrite( os.path.join(params["output_path"], folder["_path"], "index.html"), sitehtml)    
 
@@ -373,7 +377,6 @@ def main():
         'base_path': '/',
         'output_path': '_site',
         'subtitle': 'Lorem Ipsum',
-        'author': 'Admin',
         'site_url': 'http://localhost:8000',
         'current_year': datetime.datetime.now().year,
         '_tags': {},
