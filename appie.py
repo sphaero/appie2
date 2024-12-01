@@ -348,7 +348,11 @@ def generate_index(folder, **params):
         tpl = env.get_template('index.html')
 
     entries = tuple(v for k, v in folder.items() if type(v) == dict)
-    entries = sorted(entries, key=lambda x: x.get("_filename", ""))
+    try:    #try to sort on a date key but filename if it fails
+        entries = sorted(entries, key=lambda x: x["date"], reverse=True)
+    except:
+        print("date sort failed")
+        entries = sorted(entries, key=lambda x: x.get("_filename", ""))
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
     fwrite( os.path.join(params["output_path"], folder["_path"], "index.html"), sitehtml)    
 
