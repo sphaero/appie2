@@ -191,6 +191,13 @@ def parse_dir(tree, **params):
                 # first check if a plugin wants this file
                 if not plugins.match_file(v, **params):
                     parse_path(v, **params)
+                    # save any tags we found to params
+                for t in v.get("tags", []):
+                    if not params.get("_tags").get(t): params["_tags"][t] = []
+                    taglist = params["_tags"].get(t)
+                    taglist.append(v)
+    # generate an index for the root
+    generate_index(tree, **params)
     if params.get("_tags"):
         generate_tags(params["_tags"], **params)
 
@@ -271,11 +278,6 @@ def parse_path(file, **params):
         if is_source_newer(file.get("_srcpath"), outfilepath + ext):
            # just copy
             shutil.copy(file["_srcpath"], outfilepath + ext)
-    # save any tags we found to params
-    for t in file.get("tags", []):
-        if not params.get("_tags").get(t): params["_tags"][t] = []
-        taglist = params["_tags"].get(t)
-        taglist.append(file)
 
 def parse_png(file, outfilepath, **params):
     """parse png image, save its mimetype and create thumbnails"""
