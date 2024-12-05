@@ -26,8 +26,12 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""Make static site with Python."""
+helpmsg ="""
+Appie is a minimal python static site generator. Just read the source!
 
+-h      This help message
+-f      Rebuild the site from scratch (rm -rf _site dir before run)
+"""
 
 import os
 import shutil
@@ -191,9 +195,10 @@ def parse_dir(tree, **params):
                 # first check if a plugin wants this file
                 if not plugins.match_file(v, **params):
                     parse_path(v, **params)
-                    # save any tags we found to params
+                # save any tags we found to params
                 for t in v.get("tags", []):
-                    if not params.get("_tags").get(t): params["_tags"][t] = []
+                    if not params.get("_tags").get(t): 
+                        params["_tags"][t] = []
                     taglist = params["_tags"].get(t)
                     taglist.append(v)
     # generate an index for the root
@@ -384,16 +389,24 @@ def main():
     params = {
         'base_path': '/',
         'output_path': '_site',
-        'subtitle': 'Lorem Ipsum',
+        'input_path': 'content',
+        'subtitle': 'Lorum Ipsum',
         'site_url': 'http://localhost:8000',
         'current_year': datetime.datetime.now().year,
-        '_tags': {},
+        '_tags': {}
     }
     # If params.json exists, load it.
     if os.path.isfile('params.json'):
         params.update(json.loads(fread('params.json')))
-
+        
     from_scratch = False
+    for arg in sys.argv:
+        if arg == "-f" :
+            from_scratch = True
+        if arg == "-h":
+            print(helpmsg)         
+            sys.exit(0)
+
     if from_scratch or not os.path.isdir(params['output_path']):
         # Create a new _site directory from scratch.
         if os.path.isdir(params['output_path']):
@@ -401,15 +414,15 @@ def main():
     shutil.copytree('static', params['output_path'], dirs_exist_ok=True)
 
     # walk the content dir to a dict and list of folders
-    tree = walk_directory("./content", **params)
+    tree = walk_directory(params["input_path"], **params)
                     
     # get nav entries from the root dir:
     if not params.get("nav"):
         nav = []
-        for k,v in tree.items():
-            if type(v) != dict:
+        for k in sorted(tree):
+            if type(tree[k]) != dict:
                 continue
-            if v.get("_type") == "dir":
+            if tree[k].get("_type") == "dir":
                 nav.append(k)
 
         params["nav"] = nav
