@@ -236,7 +236,8 @@ def parse_path(file, **params):
         fix_meta(md.Meta)
         if not file.get('thumbnail'):
             if not md.Meta.get('thumbnail') and md.Meta.get('images'):
-                file['thumbnail'] = md.Meta.get('images')[0]
+                if md.Meta.get('images')[0]:
+                    file['thumbnail'] = md.Meta.get('images')[0]
             if not file.get('thumbnail'):
                 img = read_first_img(html)
                 if img:
@@ -257,10 +258,11 @@ def parse_path(file, **params):
         for key, val, end in read_headers(html):
             file[key] = val
         firstimg = read_first_img(html)
+        if firstimg:
+            file["thumbnail"] = firstimg
         summary = read_first_paragraph(html)
         file.update({
             "content": html,
-            "thumbnail": firstimg, 
             "summary": summary, 
             "url": siteurl
             })
