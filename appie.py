@@ -215,7 +215,7 @@ def parse_path(file, **params):
     folder = os.path.dirname(file["_sitepath"])
     filename = file["_filename"]
     ext = file["_ext"]
-    dirname = os.path.basename(folder)
+    dirname = os.path.normpath(folder).split(os.sep)[0] # for templates we use the first dir!
     outfilepath = os.path.join(params["output_path"], file["_sitedir"], filename )
 
     # try to load a corresponding template
