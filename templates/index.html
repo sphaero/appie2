@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 {% block title %}{{ title }} - {{ subtitle }} {% endblock %}
 {% block content %}
+    {{ content }}
+    {% for entry in entries %}
+    {% if entry.summary is defined %}
+    <section>
+        <a href="{{ base_path }}{{entry.url}}">
+            {% if entry.thumbnail is defined %}
+                <img clas="indeximg" src={{ base_path }}{{entry.thumbnail}} />
+            {% endif %}
+            <h1>{{entry.title}}</h1>
+        </a>
+        <p>
+            {% if entry.summary %}
+                {{entry.summary}}
+                <p><a href="{{ base_path }}{{entry.url}}"> (read more)</a></p>
+            {% endif %}
+        </p>
+    </section>
+    {% endif %}
+    {% endfor %}
 {% if _tags is defined %}
 <tags>
     <ul> 
@@ -11,27 +30,4 @@
     </ul>
 </tags>
 {% endif %}
-<date>{{ date }}</date>
-<main>
-    {{ content }}
-    {% for entry in entries %}
-    {% if entry.summary is defined %}
-    <section>
-        <h1><a href="{{ base_path }}{{entry.url}}"></h1>
-            {{ entry.title }}
-            {% if 'img' in entry and entry['img'] %}
-                <img clas="indeximg" src={{entry.img}}/>
-            {% endif %}
-        </a>
-        <p>
-            {% if entry.summary %}
-                {{entry.summary}}
-                <a href="{{ base_path }}{{entry.url}}"> (read more)</a>
-            {% endif %}
-        </p>
-    </section>
-    {% endif %}
-    {% endfor %}
-</index>
-</main>
 {% endblock %}
