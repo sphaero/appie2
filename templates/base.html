@@ -8,8 +8,9 @@
 </head>
 <body >
     <nav>
-        <!--<img src="/logo-light.svg" alt="logo" />-->
-        <a id="navhome" href="/" aria-label="Home"> </a>
+        <a id="navhome" href="/" aria-label="Home">
+          <img src="{{ base_path }}logo.png" alt="logo" />
+        </a>
         {% for entry in nav %}
         <a href="{{ base_path }}{{entry}}/">{{entry}}</a>
         {% endfor %}
