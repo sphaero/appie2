@@ -7,12 +7,13 @@ TL;DR
 -----
 
 * Clone or download this repository to your computer
-* Modify/add static files to the static dir
-* Modify/add content in the content dir
-* Run python3 appie.py, the site is generated in the _site dir
+* Modify/add static files to the `static` dir
+* Modify/add content in the `content` dir
+* Run `python3 appie.py`, the site is generated in the `_site` dir
 * Upload to some webhosting platform
 
 See the example [here](http://pong.hku.nl/~arnaud.loonstra/appie2/)
+
 Contents
 --------
 
@@ -49,7 +50,7 @@ git clone https://github.com/sphaero/appie2
 ```
 
 2: Install the dependencies (only jinja2, pillow and markdown). Might be best 
-to do in a [virtual env](https://docs.python.org/3/tutorial/venv.html)
+to do in a [virtual env](https://docs.python.org/3/tutorial/venv.html).
 From appie2's root directory run:
 
 ```sh
@@ -62,7 +63,7 @@ pip install -r requirements.txt
 python3 appie.py
 ```
 
-You will now have the full website in the '_site' directory.
+You will now have the full website in the `_site` directory.
 
 You can host a webserver using python to preview the site:
 
@@ -73,7 +74,7 @@ python3 -m http.server
 
 Now open a browser and go to [http://localhost:8000](http://localhost:8000)
 
-4: Upload the _site directory to a website hosting platform.
+4: Upload the `_site` directory to a webserver or website hosting platform.
 
 The Code
 --------
@@ -154,9 +155,9 @@ we call `generate_index()` which will generate an index.html page
 for the directory.
 
 `parse_path()` parses markdown, plain html, and images. It will
-parse them through jinja2 and finally copies to the '_site' dir.
+parse them through jinja2 and finally copies to the `_site` dir.
 All meta data and params are passed to jinja2. If it can't match 
-a file to parse it will just copy it to the '_site' dir.
+a file to parse it will just copy it to the `_site` dir.
 
 In `parse_path()` you will also notice a plugin being called. A plugin
 is a python file `plugins.py` in which you can add your own code in case
@@ -175,7 +176,7 @@ skip the directory or file. Otherwise it will handle it normally.
 
 # Credits
 
-Appie's iteration was inspired by [MAkesite](https://github.com/sunainapai/makesite)
+Appie's iteration was inspired by [Makesite](https://github.com/sunainapai/makesite)
 
 # License
 
