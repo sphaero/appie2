@@ -1,14 +1,17 @@
 {% extends "base.html" %}
-{% block title %}{{ title|join(' ') }} - {{ subtitle|join(' ') }} {% endblock %}
+{% block title %}{{ title }} - {{ subtitle }} {% endblock %}
 {% block content %}
+{% if _tags is defined %}
 <tags>
     <ul> 
+    <div>tags:</div> 
     {% for tag in tags %}
     <li><a href="{{ base_path }}tags/{{ tag }}.html">{{ tag }}</a></li>
     {% endfor %}
     </ul>
 </tags>
-<div>{{date}}</div>
+{% endif %}
+<date>{{ date }}</date>
 <main>
 {{ content }}
 </main>
