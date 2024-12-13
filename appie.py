@@ -355,11 +355,11 @@ def generate_index(folder, **params):
     entries = tuple(v for k, v in folder.items() if type(v) == dict)
     try:    #try to sort on a date key but filename if it fails
         entries = sorted(entries, key=lambda x: x["date"], reverse=True)
+        print("Index for {} is sorted by the date key".format(foldername))
     except:
-        print("date sort failed")
         entries = sorted(entries, key=lambda x: x.get("_filename", ""))
     # save latest nav entries
-    if folder["_path"] in params["nav"]:
+    if folder["_path"] in params.get("nav", []):
         params["_latest"].append(entries[0])
 
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
