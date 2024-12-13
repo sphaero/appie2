@@ -36,7 +36,6 @@ Appie is a minimal python static site generator. Just read the source!
 import os
 import shutil
 import re
-import glob
 import sys
 import json
 import datetime
@@ -190,7 +189,6 @@ def parse_dir(tree, **params):
             elif v["_type"] == "dir":
                 os.makedirs(os.path.join(params["output_path"], v["_path"]), exist_ok=True)
                 parse_dir(v, **params)  #recurse
-                generate_index(v, **params)
             else:
                 # first check if a plugin wants this file
                 if not plugins.match_file(v, **params):
@@ -201,7 +199,7 @@ def parse_dir(tree, **params):
                         params["_tags"][t] = []
                     taglist = params["_tags"].get(t)
                     taglist.append(v)
-    # generate an index for the root
+    # generate an index for the dir
     generate_index(tree, **params)
     if params.get("_tags"):
         generate_tags(params["_tags"], **params)
@@ -360,6 +358,10 @@ def generate_index(folder, **params):
     except:
         print("date sort failed")
         entries = sorted(entries, key=lambda x: x.get("_filename", ""))
+    # save latest nav entries
+    if folder["_path"] in params["nav"]:
+        params["_latest"].append(entries[0])
+
     sitehtml = tpl.render(entries=entries, folder=folder, **params)
     fwrite( os.path.join(params["output_path"], folder["_path"], "index.html"), sitehtml)    
 
@@ -393,7 +395,8 @@ def main():
         'subtitle': 'Lorum Ipsum',
         'site_url': 'http://localhost:8000',
         'current_year': datetime.datetime.now().year,
-        '_tags': {}
+        '_tags': {},
+        '_latest': []
     }
     # If params.json exists, load it.
     if os.path.isfile('params.json'):
