@@ -195,9 +195,10 @@ def parse_dir(tree, **params):
                     parse_path(v, **params)
                 # save any tags we found to params
                 for t in v.get("tags", []):
-                    if not params.get("_tags").get(t): 
-                        params["_tags"][t] = []
-                    taglist = params["_tags"].get(t)
+                    st = t.strip()
+                    if not params.get("_tags").get(st):
+                        params["_tags"][st] = []
+                    taglist = params["_tags"].get(st)
                     taglist.append(v)
     # generate an index for the dir
     generate_index(tree, **params)
